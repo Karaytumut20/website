@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link'; // Standart Link
 import Image from 'next/image';
-import { useRouter } from 'next/navigation'; // Standart Router
+import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { projects } from '@/lib/data';
+import ProjectNavigation from '@/components/layout/ProjectNavigation'; 
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -14,135 +15,137 @@ if (typeof window !== 'undefined') {
 export default function ProjectDetail({ project, nextProject, prevProject }) {
   const router = useRouter();
   const footerRef = useRef(null);
-  const progressBarRef = useRef(null);
-  const nextProjectBarRef = useRef(null);
+  const nextProjectProgressBarRef = useRef(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [shouldUpdateProgress, setShouldUpdateProgress] = useState(true);
 
+  // --- Sayfa Yüklenme Animasyonu ---
   useEffect(() => {
-    // Sayfa açılışında en tepeye
     window.scrollTo(0, 0);
+    
+    // Basit bir giriş animasyonu (İsteğe bağlı)
+    gsap.fromTo(".project-hero-anim", 
+      { y: 50, opacity: 0 }, 
+      { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out", delay: 0.2 }
+    );
+  }, [project.id]);
 
+  // --- Scroll Driven Transition Logic (Footer) ---
+  useEffect(() => {
     const ctx = gsap.context(() => {
       
-      // 1. Üst Okuma Barı (Sayfa okundukça dolar)
-      ScrollTrigger.create({
-        trigger: 'body',
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0,
-        onUpdate: (self) => {
-          if (progressBarRef.current) {
-            gsap.set(progressBarRef.current, { scaleX: self.progress });
-          }
-        }
-      });
-
-      // 2. Footer Geçişi (Referansındaki Pinleme Mantığı)
-      // Footer ekrana girdiği an kilitlenir (pin).
-      // Kullanıcı scroll yapmaya devam ettikçe bar dolar.
-      ScrollTrigger.create({
+      const footerScrollTrigger = ScrollTrigger.create({
         trigger: footerRef.current,
-        start: 'top top', // Footer ekranın tepesine değince
-        end: '+=100%',    // Ekstra %100 scroll mesafesi boyunca kilitli kal
-        pin: true,        // KİLİTLE
-        scrub: 0,
+        start: "top top",
+        // Ekranın 2 katı kadar scroll mesafesi tanı (Geçiş süresini ayarlar)
+        end: `+=${typeof window !== 'undefined' ? window.innerHeight * 2 : 1000}px`, 
+        pin: true,
+        pinSpacing: true,
+        scrub: 0, // Scrub'ı kapattık, progress'i manuel yönetiyoruz
+        
         onUpdate: (self) => {
-          if (nextProjectBarRef.current && !isTransitioning) {
-            // Barı scroll'a göre doldur
-            gsap.set(nextProjectBarRef.current, { scaleX: self.progress });
-
-            // %100 dolduysa geçişi tetikle
-            if (self.progress >= 0.99 && !isTransitioning) {
-              setIsTransitioning(true);
-              
-              // Barı tamamen doldur
-              gsap.to(nextProjectBarRef.current, { scaleX: 1, duration: 0.1 });
-              
-              // Sayfayı karart veya içeriği gizle (Opsiyonel görsel cila)
-              // gsap.to(footerRef.current, { opacity: 0.5, duration: 0.5 });
-
-              // Yönlendirme
-              setTimeout(() => {
-                router.push(`/project/${nextProject.slug}`);
-              }, 500);
-            }
+          // Progress bar'ı güncelle
+          if (nextProjectProgressBarRef.current && shouldUpdateProgress) {
+            gsap.set(nextProjectProgressBarRef.current, {
+              scaleX: self.progress,
+            });
           }
-        }
+
+          // %100 dolduğunda geçişi tetikle
+          if (self.progress >= 0.99 && !isTransitioning) {
+            setShouldUpdateProgress(false);
+            setIsTransitioning(true);
+
+            const tl = gsap.timeline();
+
+            // Barı tamamen doldur
+            tl.set(nextProjectProgressBarRef.current, { scaleX: 1 });
+
+            // Yazıları gizle (Exit animasyonu)
+            tl.to(".project-footer-content", {
+              opacity: 0,
+              y: -20,
+              duration: 0.5,
+              ease: "power2.inOut",
+            });
+
+            // Sayfayı değiştir
+            tl.call(() => {
+              router.push(`/project/${nextProject.slug}`);
+            });
+          }
+        },
       });
 
-    });
+    }, footerRef);
 
     return () => ctx.revert();
-  }, [nextProject, router, isTransitioning]);
+  }, [nextProject, router, isTransitioning, shouldUpdateProgress]);
 
   return (
-    <div className="relative min-h-screen bg-[#e3e3db] text-black">
+    <div className="relative min-h-screen bg-[#f3f2ed] text-[#1c1c1c] font-sans selection:bg-black selection:text-white">
       
-      {/* Navbar & Okuma Barı */}
-      <div className="fixed top-0 left-0 z-40 flex items-center justify-between w-full px-6 py-6 text-white mix-blend-difference">
-        <Link href={`/project/${prevProject.slug}`} className="hidden text-xs tracking-widest uppercase transition-opacity md:block hover:opacity-50">
-          ← Prev
-        </Link>
-        
-        {/* Orta: Okuma Barı */}
-        <div className="relative flex-1 mx-4 md:mx-10 h-[40px] flex items-center justify-center border border-white/20 rounded-full overflow-hidden bg-black/5 backdrop-blur-sm">
-          <div ref={progressBarRef} className="absolute top-0 left-0 w-full h-full origin-left scale-x-0 bg-white" />
-          <span className="relative z-10 font-mono text-sm text-white uppercase mix-blend-difference">
-            {project.title}
-          </span>
-        </div>
+      {/* Navbar (McAlpine Style) */}
+      <ProjectNavigation 
+        project={project}
+        nextProject={nextProject}
+        prevProject={prevProject}
+        allProjects={projects} 
+      />
 
-        <Link href={`/project/${nextProject.slug}`} className="hidden text-xs tracking-widest uppercase transition-opacity md:block hover:opacity-50">
-          Next →
-        </Link>
-      </div>
-
-      {/* Hero */}
-      <div className="w-full h-[80vh] flex flex-col justify-center items-center px-4 pt-20">
-        <h1 className="text-[10vw] font-bold uppercase leading-none tracking-tighter text-center">
+      {/* --- HERO SECTION --- */}
+      <div className="w-full min-h-[80vh] flex flex-col justify-center items-center px-6 pt-32 pb-20 text-center">
+        <h1 className="project-hero-anim text-[10vw] font-medium uppercase leading-[0.85] tracking-tight mb-8">
           {project.title}
         </h1>
-        <p className="max-w-2xl mt-8 text-lg leading-relaxed text-center md:text-xl opacity-70">
+        <p className="max-w-2xl text-xl leading-relaxed project-hero-anim opacity-60">
           {project.description}
         </p>
-        <div className="flex gap-10 mt-10 font-mono text-sm uppercase opacity-50">
+        <div className="flex gap-8 mt-12 font-mono text-xs tracking-widest uppercase project-hero-anim opacity-40">
             <span>{project.category}</span>
+            <span>—</span>
             <span>{project.year}</span>
         </div>
       </div>
 
-      {/* Galeri */}
-      <div className="flex flex-col w-full gap-20 px-4 pb-20 md:px-20">
-        {project.images.map((img, i) => (
-            <div key={i} className="relative w-full aspect-video md:aspect-[16/9] bg-gray-300 overflow-hidden">
+      {/* --- MAIN IMAGE --- */}
+      <div className="w-full h-[60vh] md:h-screen relative overflow-hidden bg-gray-200">
+         <Image 
+            src={project.cover} 
+            alt={project.title} 
+            fill 
+            className="object-cover"
+            priority
+         />
+      </div>
+
+      {/* --- GALLERY --- */}
+      <div className="w-full px-4 py-20 md:px-20 md:py-40 flex flex-col gap-20 bg-[#f3f2ed]">
+        {project.images && project.images.slice(1).map((img, i) => (
+            <div key={i} className="relative w-full aspect-square md:aspect-[16/9] bg-gray-300 overflow-hidden rounded-sm group">
                 <Image 
                     src={img} 
                     alt="Detail" 
                     fill 
-                    className="object-cover transition-transform duration-1000 hover:scale-105" 
+                    className="object-cover transition-transform duration-700 group-hover:scale-105" 
                 />
             </div>
         ))}
       </div>
 
-      {/* --- Footer (Geçiş Alanı) --- */}
-      <div ref={footerRef} className="w-full h-screen flex flex-col justify-center items-center relative bg-[#141516] text-white z-20 overflow-hidden">
-        <span className="mb-4 font-mono text-sm uppercase opacity-50">Next Project</span>
-        <h2 className="text-[8vw] font-bold uppercase tracking-tighter text-center leading-none mb-10">
-            {nextProject.title}
-        </h2>
-        
-        {/* Dolacak olan Bar */}
-        <div className="absolute bottom-0 left-0 w-full h-4 bg-white/10">
+      {/* --- FOOTER TRANSITION SECTION --- */}
+      <div ref={footerRef} className="project-footer">
+        <div className="flex flex-col items-center gap-4 project-footer-content">
+            <span className="project-footer-copy">Next Project</span>
+            <h1>{nextProject.title}</h1>
+        </div>
+
+        <div className="next-project-progress">
             <div 
-                ref={nextProjectBarRef}
-                className="w-full h-full origin-left scale-x-0 bg-white"
+                ref={nextProjectProgressBarRef}
+                className="next-project-progress-bar"
             />
         </div>
-        
-        <p className="absolute font-mono text-xs tracking-widest uppercase bottom-12 opacity-40 animate-pulse">
-            Scroll to Navigate
-        </p>
       </div>
 
     </div>

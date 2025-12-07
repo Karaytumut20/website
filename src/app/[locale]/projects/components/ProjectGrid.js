@@ -1,27 +1,61 @@
 'use client';
-import Link from 'next/link'; // DÜZELTME: Standart Link
-import DistortionEffect from '@/components/webgl/DistortionEffect';
+import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { gsap } from 'gsap';
 
 export default function ProjectGrid({ projects }) {
+  const gridRef = useRef(null);
+
+  // Giriş Animasyonu (Kartlar sırayla belirir)
+  useEffect(() => {
+    if(!gridRef.current) return;
+    gsap.fromTo(gridRef.current.children,
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power2.out', clearProps: "all" }
+    );
+  }, [projects]);
+
   return (
-    <div className="grid grid-cols-1 gap-4 p-4 pt-40 md:grid-cols-2 md:gap-10 md:p-10">
+    <div ref={gridRef} className="grid grid-cols-1 pt-10 md:grid-cols-2 gap-x-10 gap-y-20">
       {projects.map((project) => (
         <Link 
           key={project.id} 
           href={`/project/${project.slug}`}
-          className="group relative block w-full aspect-[4/3] overflow-hidden bg-gray-900 rounded-sm"
+          className="block w-full cursor-pointer group"
         >
-          {/* WebGL Efekti (Tıklamayı engellememesi için pointer-events-none) */}
-          <div className="absolute inset-0 w-full h-full transition-opacity duration-500 pointer-events-none opacity-80 group-hover:opacity-100">
-             <DistortionEffect imageSrc={project.cover} />
+          {/* --- Kart Görseli --- */}
+          <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-gray-200 mb-6">
+             {/* Resim */}
+             <Image 
+                src={project.cover} 
+                alt={project.title} 
+                fill 
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+             />
+             
+             {/* Hover Overlay & Button */}
+             <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-500 opacity-0 bg-black/20 group-hover:opacity-100">
+                <div className="flex items-center justify-center w-24 h-24 transition-transform duration-500 delay-100 transform scale-0 bg-white rounded-full shadow-xl group-hover:scale-100">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-black">
+                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                </div>
+                <span className="absolute mt-32 text-sm font-medium tracking-wide text-white transition-all duration-500 delay-200 transform translate-y-4 opacity-0 group-hover:opacity-100 group-hover:translate-y-0">
+                    View Project
+                </span>
+             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 z-10 flex items-end justify-between w-full p-6 transition-transform duration-500 translate-y-full group-hover:translate-y-0 bg-gradient-to-t from-black/80 to-transparent">
-            <div>
-              <h3 className="text-2xl font-bold text-white uppercase md:text-3xl">{project.title}</h3>
-              <p className="mt-1 text-xs tracking-widest uppercase text-white/70">{project.category}</p>
+          {/* --- Kart Bilgileri --- */}
+          <div className="flex flex-col gap-1">
+            <h3 className="text-3xl font-medium tracking-tight text-[#1c1c1c] group-hover:underline decoration-1 underline-offset-4">
+                {project.title}
+            </h3>
+            <div className="flex items-center justify-between text-sm font-medium opacity-60">
+                <span>{project.client || project.category}</span>
+                <span className="font-mono text-xs">{project.services ? project.services.split('/')[0] : "Design"}</span>
             </div>
-            <span className="font-mono text-sm text-white/50">{project.year}</span>
           </div>
         </Link>
       ))}

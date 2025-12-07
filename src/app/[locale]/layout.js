@@ -2,11 +2,10 @@
 
 import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
-// ViewTransitions KALDIRILDI
 import useScroll from '@/hooks/useScroll';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Preloader from '@/components/animation/Preloader';
+import Preloader from '@/components/animation/Preloader'; // Preloader import edildi
 
 export default function LocaleLayout({ children, params: { locale } }) {
   useScroll();
@@ -20,7 +19,7 @@ export default function LocaleLayout({ children, params: { locale } }) {
       <body className="antialiased bg-[#e3e3db] text-black">
         <NextIntlClientProvider locale={locale} messages={messages}>
           
-          <Preloader />
+          <Preloader /> {/* Sayfanın en üstünde çağrılıyor */}
           <Header />
           
           <main className="relative z-10 min-h-screen">

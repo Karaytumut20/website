@@ -4,7 +4,6 @@ const withNextIntl = createNextIntlPlugin('./src/lib/i18n.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // WebGL shader dosyalarını import edebilmek için
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(glsl|vs|fs|vert|frag)$/,

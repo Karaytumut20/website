@@ -4,33 +4,78 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-rgb: 227, 227, 219; /* Hafif kirli beyaz/bej tonu - Brutalist için */
+  --background-rgb: 227, 227, 219;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
-  font-family: Arial, Helvetica, sans-serif; /* Şimdilik placeholder */
-  overflow-x: hidden; /* Yatay taşmayı engelle */
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
-/* Lenis Smooth Scroll Gerekli Ayarlar */
-html.lenis, html.lenis body {
-  height: auto;
+/* Lenis Smooth Scroll Ayarları */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+/* --- Scroll Driven Footer Styles --- */
+.project-footer {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Tam ekran */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #141516; /* Koyu arka plan */
+  color: #ffffff;
+  overflow: hidden;
+  z-index: 10;
 }
 
-.lenis.lenis-smooth {
-  scroll-behavior: auto !important;
+.project-footer h1 {
+  font-size: 8vw;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1;
 }
 
-.lenis.lenis-smooth [data-lenis-prevent] {
-  overscroll-behavior: contain;
+.project-footer-copy {
+  margin-top: 2rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
 }
 
-.lenis.lenis-stopped {
+.next-project-progress {
+  position: absolute;
+  bottom: 20%;
+  width: 300px; /* Genişlik referanstaki gibi sınırlandırıldı */
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.lenis.lenis-scrolling iframe {
-  pointer-events: none;
+@media (min-width: 768px) {
+  .next-project-progress {
+    width: 400px;
+  }
+}
+
+.next-project-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+  will-change: transform;
 }
