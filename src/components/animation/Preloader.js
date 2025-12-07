@@ -136,19 +136,19 @@ export default function Preloader() {
         >
             {/* Resim 1 */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden bg-black">
-                <Image src="/assets/preloader/img1.jpg" alt="Reveal 1" fill className="object-cover" priority />
+                <Image src="/assets/img1.jpg" alt="Reveal 1" fill className="object-cover" priority />
             </div>
             {/* Resim 2 */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden bg-black">
-                <Image src="/assets/preloader/img2.jpg" alt="Reveal 2" fill className="object-cover" priority />
+                <Image src="/assets/img2.jpg" alt="Reveal 2" fill className="object-cover" priority />
             </div>
             {/* Resim 3 */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden bg-black">
-                <Image src="/assets/preloader/img3.jpg" alt="Reveal 3" fill className="object-cover" priority />
+                <Image src="/assets/img3.jpg" alt="Reveal 3" fill className="object-cover" priority />
             </div>
             {/* Resim 4 */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden bg-black">
-                <Image src="/assets/preloader/img4.jpg" alt="Reveal 4" fill className="object-cover" priority />
+                <Image src="/assets/img4.jpg" alt="Reveal 4" fill className="object-cover" priority />
             </div>
         </div>
     </div>
