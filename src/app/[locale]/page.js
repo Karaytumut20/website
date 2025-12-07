@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import DistortionEffect from '@/components/webgl/DistortionEffect';
+import TextReveal from '@/components/animation/TextReveal'; // Yeni eklediğimiz
 
 export default function Home() {
   const t = useTranslations('Hero');
@@ -9,14 +10,16 @@ export default function Home() {
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-black">
       
-      {/* Efektin çalışması için public/assets klasörüne bir resim koymalısın */}
+      {/* WebGL Distortion Efekti */}
       <DistortionEffect imageSrc="/assets/img1.png" />
 
-      <div className="z-10 text-center text-white pointer-events-none mix-blend-difference">
-        <h1 className="text-[7vw] font-bold uppercase leading-none tracking-tighter">
+      <div className="z-10 px-4 text-center text-white pointer-events-none mix-blend-difference">
+        {/* TextReveal Animasyonu */}
+        <TextReveal className="text-[7vw] font-bold uppercase leading-none tracking-tighter">
           {t('title')}
-        </h1>
-        <div className="flex justify-between w-full max-w-lg mx-auto mt-8 text-sm tracking-widest uppercase opacity-80">
+        </TextReveal>
+        
+        <div className="flex justify-between w-full max-w-lg mx-auto mt-12 uppercase text-xs tracking-[0.2em] opacity-80 animate-pulse">
             <span>Est. 2025</span>
             <span>Digital Studio</span>
         </div>

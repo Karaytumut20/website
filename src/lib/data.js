@@ -5,9 +5,9 @@ export const projects = [
     slug: "innovate-2024",
     category: "Strategy",
     year: "2024",
-    description: "A strategic overhaul for a leading tech summit, focusing on future-proof identities and digital transformation.",
-    cover: "/assets/img1.jpg", 
-    images: ["/assets/img1.jpg", "/assets/img2.jpg", "/assets/img3.jpg"] // Detay sayfasındaki galeri
+    description: "A strategic overhaul for a leading tech summit.",
+    cover: "/assets/img1.png", 
+    images: ["/assets/img1.png", "/assets/img2.png", "/assets/img3.png"] 
   },
   {
     id: 2,
@@ -15,9 +15,9 @@ export const projects = [
     slug: "lvxh-amot",
     category: "Branding",
     year: "2023",
-    description: "Luxury fashion branding with a minimalist touch, blending heritage with modernity to create a timeless aesthetic.",
-    cover: "/assets/img2.jpg",
-    images: ["/assets/img2.jpg", "/assets/img4.jpg", "/assets/img5.jpg"]
+    description: "Luxury fashion branding with a minimalist touch.",
+    cover: "/assets/img2.png",
+    images: ["/assets/img2.png", "/assets/img4.png", "/assets/img5.png"]
   },
   {
     id: 3,
@@ -25,9 +25,9 @@ export const projects = [
     slug: "artisan-craft",
     category: "Development",
     year: "2023",
-    description: "E-commerce platform for handmade goods, connecting artisans with a global audience through seamless storytelling.",
-    cover: "/assets/img3.jpg",
-    images: ["/assets/img3.jpg", "/assets/img6.jpg", "/assets/img7.jpg"]
+    description: "E-commerce platform for handmade goods.",
+    cover: "/assets/img3.png",
+    images: ["/assets/img3.png", "/assets/img6.png", "/assets/img7.png"]
   },
   {
     id: 4,
@@ -35,9 +35,9 @@ export const projects = [
     slug: "disguised-edge",
     category: "Design",
     year: "2022",
-    description: "Editorial design for a modern art magazine, challenging traditional layouts with bold typography and grids.",
-    cover: "/assets/img4.jpg",
-    images: ["/assets/img4.jpg", "/assets/img8.jpg", "/assets/img9.jpg"]
+    description: "Editorial design for a modern art magazine.",
+    cover: "/assets/img4.png",
+    images: ["/assets/img4.png", "/assets/img8.png", "/assets/img9.png"]
   },
   {
     id: 5,
@@ -45,7 +45,7 @@ export const projects = [
     slug: "nebula-stream",
     category: "Motion",
     year: "2022",
-    description: "3D motion graphics for a streaming service, creating an immersive visual language for the next gen viewers.",
+    description: "3D motion graphics for a streaming service.",
     cover: "/assets/img5.png",
     images: ["/assets/img5.png", "/assets/img10.jpg", "/assets/img11.jpg"]
   }
