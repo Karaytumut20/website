@@ -1,4 +1,4 @@
-'use client'; // Client component olduğu için ekliyoruz
+'use client';
 
 import { useTranslations } from 'next-intl';
 import DistortionEffect from '@/components/webgl/DistortionEffect';
@@ -7,19 +7,19 @@ export default function Home() {
   const t = useTranslations('Hero');
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-black">
       
-      {/* Arka Plan Efekti */}
-      <DistortionEffect imageSrc="/assets/hero-bg.jpg" />
+      {/* Efektin çalışması için public/assets klasörüne bir resim koymalısın */}
+      <DistortionEffect imageSrc="/assets/img1.png" />
 
-      {/* İçerik */}
       <div className="z-10 text-center text-white pointer-events-none mix-blend-difference">
-        <h1 className="text-[6vw] font-bold uppercase leading-none tracking-tighter">
+        <h1 className="text-[7vw] font-bold uppercase leading-none tracking-tighter">
           {t('title')}
         </h1>
-        <p className="mt-6 text-xl font-light tracking-widest opacity-80">
-          EST. 2025
-        </p>
+        <div className="flex justify-between w-full max-w-lg mx-auto mt-8 text-sm tracking-widest uppercase opacity-80">
+            <span>Est. 2025</span>
+            <span>Digital Studio</span>
+        </div>
       </div>
 
     </div>
