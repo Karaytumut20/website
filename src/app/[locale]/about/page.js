@@ -106,12 +106,12 @@ export default function AboutPage() {
             {/* Büyük CTA (En Sağ Alt) */}
             <div className="flex flex-col items-start gap-8 mt-auto">
                 <h2 className="text-5xl md:text-7xl lg:text-[5vw] font-black uppercase tracking-tighter leading-[0.85] text-black">
-                    Let's Create<br/>Bold Visual<br/>Together
+                    Let&apos;s Create<br/>Bold Visual<br/>Together
                 </h2>
                 
                 <Link href="/contact">
                     <button className="bg-black text-white px-8 py-4 font-mono text-[10px] uppercase tracking-widest hover:bg-[#333] transition-colors rounded-sm">
-                        Let's Work Together
+                        Let&apos;s Work Together
                     </button>
                 </Link>
             </div>
