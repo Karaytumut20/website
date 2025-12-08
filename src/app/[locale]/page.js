@@ -1,9 +1,11 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useLayoutEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
+import ProjectList from './projects/components/ProjectList'; // Liste bileşeni import edildi
+import { projects } from '@/lib/data'; // Proje datası import edildi
 
 // GSAP ScrollTrigger Eklentisini Kaydet
 if (typeof window !== 'undefined') {
@@ -11,13 +13,19 @@ if (typeof window !== 'undefined') {
 }
 
 export default function Home() {
-  const t = useTranslations('Hero'); // Eğer json dosyasında Hero verisi yoksa hata vermemesi için aşağıda manuel metin kullandım.
+  const t = useTranslations('Hero');
   
   const mainRef = useRef(null);
   const heroRef = useRef(null);
   const videoContainerRef = useRef(null);
   const videoRef = useRef(null);
   const textRef = useRef(null);
+
+  // --- Sayfa Yüklenince En Üsten Başlat ---
+  // useLayoutEffect, boyama (paint) işleminden önce çalışır, titremeyi engeller.
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -27,35 +35,33 @@ export default function Home() {
         scrollTrigger: {
           trigger: heroRef.current,
           start: "top top",
-          end: "+=150%", // Scroll mesafesi (Hız ayarı)
+          end: "+=100%", // Scroll mesafesi
           pin: true,     // Hero bölümünü ekrana çivile
-          scrub: 1,      // Scroll ile senkronize çalış (Yumuşak geçiş)
+          scrub: 1,      // Scroll ile senkronize çalış
         }
       });
 
-      // 1. Videonun Genişlemesi (Görseldeki "Aşağıya inip tam gözükme" efekti)
-      // Başlangıç: Kenarlardan basık (inset). Bitiş: Tam ekran (inset 0).
+      // 1. Videonun Genişlemesi
       tl.fromTo(videoContainerRef.current, 
         { 
-          // Başlangıçta üstten/alttan/yanlardan boşluklu (Yazının arkasında bir kutu gibi)
           clipPath: "inset(10% 20% 10% 20% round 10px)", 
           scale: 0.95
         },
         { 
-          clipPath: "inset(0% 0% 0% 0% round 0px)", // Tamamen açılır
+          clipPath: "inset(0% 0% 0% 0% round 0px)", 
           scale: 1,
           duration: 1,
           ease: "power2.inOut" 
         }
       )
-      // 2. Yazının Hareketi (Video açılırken yazı silikleşip yukarı çıkar)
+      // 2. Yazının Hareketi
       .to(textRef.current, {
         scale: 1.2,
         y: -50,
         opacity: 0,
         duration: 0.5,
         ease: "power1.in"
-      }, "<"); // Video animasyonuyla aynı anda başla
+      }, "<"); 
 
     }, mainRef);
 
@@ -68,21 +74,18 @@ export default function Home() {
       {/* --- HERO SECTION (Sticky Video) --- */}
       <div ref={heroRef} className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-white">
         
-        {/* Yazı Katmanı (En Üstte) */}
+        {/* Yazı Katmanı */}
         <div ref={textRef} className="absolute z-20 px-4 text-center text-white pointer-events-none mix-blend-difference">
-          {/* David Alaba Stili Büyük Başlık */}
           <h1 className="text-[15vw] md:text-[12vw] font-black uppercase tracking-tighter leading-[0.8] mb-4">
-            David<br/>Alaba
+            Hope<br/>& Honor
           </h1>
           <p className="text-sm md:text-xl tracking-[0.5em] uppercase font-medium opacity-80">
-            Foundation
+            Est. 2025
           </p>
         </div>
 
-        {/* Video Katmanı (Arka Planda) */}
+        {/* Video Katmanı */}
         <div ref={videoContainerRef} className="relative z-10 w-full h-full">
-            {/* Video Elementi */}
-            {/* ÖNEMLİ: muted, playsInline ve autoPlay özellikleri video oynaması için şarttır */}
             <video 
               ref={videoRef}
               className="absolute top-0 left-0 object-cover w-full h-full"
@@ -90,62 +93,44 @@ export default function Home() {
               muted 
               loop 
               playsInline
-              poster="/assets/img1.jpg" // Video yüklenene kadar gösterilecek resim
+              poster="/assets/img1.jpg"
             >
-              {/* Kendi videonuzun yolunu buraya yazın. Örn: /assets/hero-video.mp4 */}
               <source src="/assets/hero-video.mp4" type="video/mp4" />
-              {/* Eğer video dosyanız yoksa test için bu linki açabilirsiniz: 
-                  <source src="https://cdn.coverr.co/videos/coverr-playing-football-2877/1080p.mp4" type="video/mp4" /> 
-              */}
             </video>
-            
-            {/* Video Üzeri Hafif Karartma (Yazı okunabilirliği için) */}
             <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
       </div>
 
-      {/* --- ABOUT SECTION (After Scroll - Siyah Bölüm) --- */}
-      {/* Görseldeki: 'We turn founders visions...' bölümü */}
-      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 px-6 md:px-10 min-h-screen flex flex-col justify-center">
+      {/* --- LATEST PROJECTS (Liste Yapısı) --- */}
+      {/* Videodaki gibi Hero'nun hemen altında liste tarzı bölüm */}
+      <div className="relative z-30 bg-[#f3f2ed] pt-20 pb-20">
         
-        {/* Üst Kısım: Büyük Slogan */}
-        <div className="max-w-[90%] mx-auto mb-24">
-          <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
-            We turn founders’ visions into remarkable brands by combining strategy, design, and performance marketing, all under one roof. <span className="text-white transition-colors border-b cursor-pointer border-white/40 hover:border-white">Explore our services.</span>
-          </h2>
+        {/* Başlık */}
+        <div className="px-6 mb-10 md:px-10">
+            <span className="font-mono text-xs tracking-widest uppercase opacity-40">Selected Works</span>
         </div>
 
-        {/* Alt Kısım: Grid Bilgiler */}
-        <div className="w-full max-w-[90%] mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 pt-10 border-t border-white/10">
-          
-          {/* Sol: Etiket */}
-          <div className="md:col-span-4">
-            <span className="font-mono text-xs tracking-widest uppercase text-white/40">
-              Tomorrow's brands, today.
-            </span>
-          </div>
+        {/* Proje Listesi Bileşeni */}
+        <ProjectList projects={projects.slice(0, 4)} /> 
 
-          {/* Orta: Boşluk */}
-          <div className="hidden md:col-span-2 md:block"></div>
-
-          {/* Sağ: Açıklama ve Link */}
-          <div className="flex flex-col gap-12 md:col-span-6">
-            <div className="flex flex-col gap-6 text-lg font-light leading-relaxed md:text-xl text-white/60">
-              <p>
-                Since 2013, we have been recognized globally for helping founders build market-defining brands.
-              </p>
-              <p>
-                We partner with five clients a year to give each one the focus and care they deserve.
-              </p>
-            </div>
-            
-            <Link href="/about" className="inline-flex items-center gap-2 pb-1 text-white transition-colors border-b border-white/30 hover:border-white w-max group">
-              <span className="text-sm tracking-widest uppercase">Learn More</span>
-              <span className="text-xs transition-transform group-hover:translate-x-1">↗</span>
+        {/* Tüm Projeler Butonu */}
+        <div className="flex justify-center mt-20">
+            <Link href="/projects">
+                <button className="px-8 py-4 text-sm font-bold tracking-widest text-white uppercase transition-colors bg-black rounded-full hover:bg-zinc-800">
+                    View All Projects
+                </button>
             </Link>
-          </div>
+        </div>
 
+      </div>
+
+      {/* --- ABOUT / MANIFESTO (Siyah Bölüm) --- */}
+      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 px-6 md:px-10 min-h-[80vh] flex flex-col justify-center">
+        <div className="max-w-[90%] mx-auto mb-24">
+          <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
+            We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
+          </h2>
         </div>
       </div>
 

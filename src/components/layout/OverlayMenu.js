@@ -8,32 +8,24 @@ export default function OverlayMenu({ isOpen, onClose }) {
   const menuRef = useRef(null);
   const contentRef = useRef(null);
   
-  // Görseldeki menü verileri
+  // Güncel ve Doğru Link Yapısı
   const mainLinks = [
-    { label: "Timepieces", path: "/projects" },
-    { label: "R&D", path: "/about" },
-    { label: "Our Ethos", path: "/contact" }
+    { id: "01", label: "Home", path: "/" },
+    { id: "02", label: "Work", path: "/projects" },
+    { id: "03", label: "Studio", path: "/about" },
+    { id: "04", label: "Contact", path: "/contact" }
   ];
 
-  const quickLinks = [
-    { label: "EXPLORE ACF-01", path: "/project/innovate-2024" },
-    { label: "PARTNERS", path: "/about" },
-    { label: "CONTACT", path: "/contact" }
-  ];
-
-  const researchLinks = [
-    { label: "ACF-02 DESIGN", path: "/projects" },
-    { label: "ACF-01 FRAME", path: "/projects" },
-    { label: "CALIBER AMB* TESTS", path: "/projects" },
-    { label: "PROTOTYPES #01 - #02", path: "/projects" }
+  const socialLinks = [
+    { label: "Instagram", url: "#" },
+    { label: "LinkedIn", url: "#" },
+    { label: "Behance", url: "#" }
   ];
 
   useEffect(() => {
     if (isOpen) {
-      // 1. Menü görünür olsun (opacity 0'dan başla)
       gsap.set(menuRef.current, { visibility: 'visible', opacity: 0 });
       
-      // 2. Açılış Animasyonu
       const tl = gsap.timeline();
       
       tl.to(menuRef.current, {
@@ -48,7 +40,6 @@ export default function OverlayMenu({ isOpen, onClose }) {
       );
 
     } else {
-      // Kapanış Animasyonu
       gsap.to(menuRef.current, {
         opacity: 0,
         duration: 0.5,
@@ -63,109 +54,39 @@ export default function OverlayMenu({ isOpen, onClose }) {
   return (
     <div 
       ref={menuRef} 
-      className="fixed inset-0 bg-white z-[90] text-black invisible opacity-0 flex flex-col justify-between"
+      className="fixed inset-0 bg-[#0a0a0a] z-[90] text-white invisible opacity-0 flex flex-col"
     >
-      {/* --- Üst Header (Logo ve Kapatma Butonu) --- */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-100 md:p-10">
-        {/* Sol Üst Logo (Tasarım'daki NV logosu temsili) */}
-        <div className="w-10 h-10">
-           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-             <path d="M2 20V4L8 14L14 4V20" stroke="currentColor" strokeWidth="2" strokeLinecap="square"/>
-           </svg>
-        </div>
-
-        {/* Sağ Üst Kapatma Butonu */}
-        <button onClick={onClose} className="p-2 group">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition-transform duration-300 group-hover:rotate-90">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-      </div>
-
-      {/* --- Ana İçerik Grid Yapısı --- */}
-      <div ref={contentRef} className="grid flex-1 w-full grid-cols-1 gap-10 px-6 py-10 overflow-y-auto md:px-10 md:grid-cols-12">
-        
-        {/* Sütun 1: Büyük Başlıklar (Menu) */}
-        <div className="flex flex-col pt-10 md:col-span-6">
-          <span className="mb-8 font-mono text-xs tracking-widest text-gray-400 uppercase">Menu</span>
-          <div className="flex flex-col gap-4">
-            {mainLinks.map((item, i) => (
+      {/* İçerik */}
+      <div className="flex flex-col justify-center flex-1 w-full h-full px-6 md:px-20">
+        <div ref={contentRef} className="flex flex-col gap-2">
+            {mainLinks.map((item) => (
               <Link 
-                key={i} 
+                key={item.id} 
                 href={item.path} 
                 onClick={onClose}
-                className="flex items-center justify-between text-5xl font-bold tracking-tight transition-opacity group md:text-7xl hover:opacity-50"
+                className="flex items-baseline gap-4 py-6 transition-colors border-b group md:gap-10 border-white/10 md:py-8 hover:border-white"
               >
-                <span>{item.label}</span>
-                <span className="transition-all duration-300 -translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0">
-                  →
+                <span className="font-mono text-xs transition-opacity md:text-sm opacity-40 group-hover:opacity-100">
+                    ({item.id})
+                </span>
+                <span className="text-5xl font-bold leading-none tracking-tighter uppercase transition-transform duration-500 ease-out md:text-8xl group-hover:translate-x-4">
+                    {item.label}
                 </span>
               </Link>
             ))}
-          </div>
         </div>
-
-        {/* Sütun 2: Quick Links */}
-        <div className="flex flex-col pt-10 md:col-span-3">
-          <span className="mb-8 font-mono text-xs tracking-widest text-gray-400 uppercase">Quick Links</span>
-          <div className="flex flex-col">
-            {quickLinks.map((item, i) => (
-              <Link 
-                key={i} 
-                href={item.path} 
-                onClick={onClose}
-                className="py-4 font-mono text-sm tracking-wide uppercase transition-all border-b border-gray-200 hover:pl-2"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Sütun 3: Latest Research */}
-        <div className="flex flex-col pt-10 md:col-span-3">
-          <span className="mb-8 font-mono text-xs tracking-widest text-gray-400 uppercase">Latest Research</span>
-          <div className="flex flex-col">
-            {researchLinks.map((item, i) => (
-              <Link 
-                key={i} 
-                href={item.path} 
-                onClick={onClose}
-                className="py-4 font-mono text-sm tracking-wide uppercase transition-all border-b border-gray-200 hover:pl-2"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
       </div>
 
-      {/* --- Footer (Sosyal Medya Hapları) --- */}
-      <div className="w-full px-6 py-10 border-t border-gray-100 md:px-10">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          
-          <a href="#" className="flex items-center justify-between w-full gap-4 px-6 py-3 transition-colors bg-gray-100 rounded-full md:w-auto group hover:bg-black hover:text-white">
-            <span className="font-mono text-xs opacity-50">1.0</span>
-            <span className="font-mono text-xs tracking-widest uppercase">Instagram</span>
-          </a>
-
-          <span className="hidden text-2xl font-light text-gray-300 md:block">/</span>
-
-          <a href="#" className="flex items-center justify-between w-full gap-4 px-6 py-3 transition-colors bg-gray-100 rounded-full md:w-auto group hover:bg-black hover:text-white">
-            <span className="font-mono text-xs opacity-50">2.0</span>
-            <span className="font-mono text-xs tracking-widest uppercase">LinkedIn</span>
-          </a>
-
-          <span className="hidden text-2xl font-light text-gray-300 md:block">/</span>
-
-          <a href="#" className="flex items-center justify-between w-full gap-4 px-6 py-3 transition-colors bg-gray-100 rounded-full md:w-auto group hover:bg-black hover:text-white">
-            <span className="font-mono text-xs opacity-50">3.0</span>
-            <span className="font-mono text-xs tracking-widest uppercase">Pinterest</span>
-          </a>
-
-        </div>
+      {/* Alt Footer */}
+      <div className="flex items-end justify-between w-full px-6 py-10 border-t md:px-20 border-white/10">
+         <div className="flex gap-6">
+            {socialLinks.map((social, i) => (
+                <a key={i} href={social.url} className="font-mono text-xs tracking-widest uppercase transition-opacity opacity-40 hover:opacity-100">
+                    {social.label}
+                </a>
+            ))}
+         </div>
+         <span className="text-[10px] font-mono opacity-20 uppercase">Based in Worldwide</span>
       </div>
 
     </div>
