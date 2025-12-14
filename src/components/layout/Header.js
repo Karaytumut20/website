@@ -24,7 +24,7 @@ export default function Header() {
         {/* Sol Üst: Marka ve Zaman */}
         <div className="flex flex-col gap-1 pointer-events-auto">
           <Link href="/" className="font-sans text-xl font-bold leading-none tracking-tighter uppercase md:text-2xl">
-            Hope & Honor
+           Umut
           </Link>
           <div className="flex gap-2 text-[10px] uppercase tracking-widest opacity-60 font-mono mt-1">
             <span>{time} ET</span>

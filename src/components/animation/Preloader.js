@@ -21,17 +21,17 @@ export default function Preloader() {
     document.body.style.overflow = "hidden";
     window.scrollTo(0, 0); // Sayfa pozisyonunu en üste al
 
-    // --- FAZ 1: Yükleme Ekranı (Hope & Honor) ---
+    // --- FAZ 1: Yükleme Ekranı ---
     
-    // 1. Bar dolsun (0 -> 100%)
+    // 1. Bar dolsun (0 -> 100%) - SÜRE HIZLANDIRILDI (2s -> 1s)
     tl.to(progressRef.current, {
       scaleX: 1,
-      duration: 2, // Yükleme süresi
+      duration: 1, 
       ease: "power3.inOut"
     })
     .to({ val: 0 }, {
         val: 100,
-        duration: 2,
+        duration: 1,
         ease: "power3.inOut",
         onUpdate: function() {
             if(percentRef.current) {
@@ -40,62 +40,59 @@ export default function Preloader() {
         }
     }, "<") // Bar ile senkronize
 
-    // 2. Yükleme yazıları ve bar silinsin
+    // 2. Yükleme yazıları ve bar silinsin - SÜRE HIZLANDIRILDI (0.5s -> 0.3s)
     .to(textContainerRef.current, {
         opacity: 0,
         y: -20,
-        duration: 0.5,
+        duration: 0.3,
         ease: "power2.inOut"
     })
 
     // --- FAZ 2: Görsel Şovu (Reveal) ---
 
-    // 3. Görsel Kutusunu Görünür Yap ve Perdeyi Aç
-    // Not: CSS'te 'invisible' ve 'opacity-0' verdik, burada 'autoAlpha: 1' ile açıyoruz.
+    // 3. Görsel Kutusunu Görünür Yap ve Perdeyi Aç - SÜRE HIZLANDIRILDI (0.8s -> 0.5s)
     .to(imagesContainerRef.current, {
         autoAlpha: 1, 
         clipPath: "inset(0% 0 0% 0)", // Perdeyi tamamen aç
-        duration: 0.8,
+        duration: 0.5,
         ease: "power4.inOut"
     })
 
-    // 4. Görseller Arası Hızlı Geçiş (Flash Effect)
-    // İlk resim zaten görünüyor, diğerlerini sırayla hızlıca aç
-    .to(images[1], { opacity: 1, duration: 0, delay: 0.25 }) 
-    .to(images[2], { opacity: 1, duration: 0, delay: 0.25 }) 
-    .to(images[3], { opacity: 1, duration: 0, delay: 0.25 }) 
+    // 4. Görseller Arası Hızlı Geçiş (Flash Effect) - GECİKMELER AZALTILDI (0.25s -> 0.12s)
+    .to(images[1], { opacity: 1, duration: 0, delay: 0.12 }) 
+    .to(images[2], { opacity: 1, duration: 0, delay: 0.12 }) 
+    .to(images[3], { opacity: 1, duration: 0, delay: 0.12 }) 
     
-    // 5. Görsel kutusunu kapat (Perdeyi çek)
+    // 5. Görsel kutusunu kapat (Perdeyi çek) - SÜRE VE GECİKME AZALTILDI
     .to(imagesContainerRef.current, {
         clipPath: "inset(0% 0 100% 0)", // Aşağıdan yukarı kapanış efekti
-        duration: 0.8,
+        duration: 0.5,
         ease: "power4.inOut",
-        delay: 0.3
+        delay: 0.15 
     })
 
     // --- FAZ 3: Final Logo (H & H) ---
 
-    // 6. "H & H" Logosunu göster
+    // 6. "H & H" Logosunu göster - SÜRE HIZLANDIRILDI (0.5s -> 0.3s)
     .to(finalLogoRef.current, {
         autoAlpha: 1, 
         y: 0,
-        duration: 0.5,
+        duration: 0.3,
         ease: "power2.out"
     })
-    // Ekranda kısa bir süre kalsın (Marka bilinirliği)
-    .to({}, { duration: 0.8 })
+    // Ekranda kısa bir süre kalsın (Marka bilinirliği) - SÜRE AZALTILDI (0.8s -> 0.4s)
+    .to({}, { duration: 0.4 })
 
     // --- FAZ 4: Siteye Giriş ---
 
-    // 7. Siyah perdeyi yukarı kaldır
+    // 7. Siyah perdeyi yukarı kaldır - SÜRE HIZLANDIRILDI (1.2s -> 0.8s)
     .to(containerRef.current, {
         yPercent: -100,
-        duration: 1.2,
+        duration: 0.8,
         ease: "power4.inOut",
         onComplete: () => {
-            // Animasyon bitince scroll'u aç ve container'ı DOM'dan kaldır (performans için)
+            // Animasyon bitince scroll'u aç ve container'ı DOM'dan kaldır
             document.body.style.overflow = "auto";
-            // Preloader'ı gizle (display: none)
             gsap.set(containerRef.current, { display: "none" });
         }
     });
@@ -112,7 +109,7 @@ export default function Preloader() {
             
             {/* Marka Adı */}
             <h1 className="font-sans text-xl md:text-3xl font-light tracking-[0.2em] uppercase">
-                Hope & Honor
+                Umut 
             </h1>
 
             {/* Loading Bar Container */}
@@ -132,7 +129,6 @@ export default function Preloader() {
         </div>
 
         {/* --- Görsel Kutusu (Başlangıçta GİZLİ: opacity-0 invisible) --- */}
-        {/* clipPath: inset(50% 0 50% 0) -> Başlangıçta ortadan kapalı */}
         <div 
             ref={imagesContainerRef}
             className="absolute z-20 w-[85vw] h-[50vh] md:w-[35vw] md:h-[65vh] bg-gray-900 opacity-0 invisible"

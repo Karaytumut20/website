@@ -49,6 +49,7 @@ export default function AboutPage() {
         </div>
 
       </div>
+      
 
       {/* --- BÖLÜM 2: DETAYLAR & CTA (Grid Yapısı) --- */}
       <div className="grid items-start w-full grid-cols-1 pt-10 border-t lg:grid-cols-12 gap-y-16 lg:gap-x-10 border-black/10">

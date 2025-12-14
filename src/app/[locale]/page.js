@@ -77,11 +77,9 @@ export default function Home() {
         {/* Yazı Katmanı */}
         <div ref={textRef} className="absolute z-20 px-4 text-center text-white pointer-events-none mix-blend-difference">
           <h1 className="text-[15vw] md:text-[12vw] font-black uppercase tracking-tighter leading-[0.8] mb-4">
-            Hope<br/>& Honor
+            Umut
           </h1>
-          <p className="text-sm md:text-xl tracking-[0.5em] uppercase font-medium opacity-80">
-            Est. 2025
-          </p>
+          
         </div>
 
         {/* Video Katmanı */}
