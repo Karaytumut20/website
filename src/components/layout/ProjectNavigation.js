@@ -1,20 +1,19 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// GSAP Plugin Kaydı
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Roma Rakamı Dönüştürücü
 const toRoman = (num) => {
-  const lookup = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
+  const lookup = { M:1000, CM:900, D:500, CD:400, C:100, XC:90, L:50, XL:40, X:10, IX:9, V:5, IV:4, I:1 };
   let roman = '';
-  for (let i in lookup ) {
-    while ( num >= lookup[i] ) {
+  for (let i in lookup) {
+    while (num >= lookup[i]) {
       roman += i;
       num -= lookup[i];
     }
@@ -24,191 +23,298 @@ const toRoman = (num) => {
 
 export default function ProjectNavigation({ project, nextProject, prevProject, allProjects }) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const overlayRef = useRef(null);
   const menuRef = useRef(null);
 
-  // --- Scroll Progress Mantığı ---
+  const currentIndex = useMemo(
+    () => allProjects.findIndex((p) => p.id === project.id) + 1,
+    [allProjects, project.id]
+  );
+
+  const total = allProjects.length;
+  const roman = toRoman(currentIndex);
+
+  // Scroll Progress
   useEffect(() => {
+    const bars = () => document.querySelectorAll('.nav-progress-fill');
+
     const trigger = ScrollTrigger.create({
-      trigger: 'body',
+      trigger: document.documentElement,
       start: 'top top',
       end: 'bottom bottom',
       scrub: 0,
       onUpdate: (self) => {
-        const bars = document.querySelectorAll('.nav-progress-fill');
-        bars.forEach(bar => {
-            gsap.set(bar, { width: `${self.progress * 100}%` });
-        });
-      }
+        const w = `${self.progress * 100}%`;
+        bars().forEach((bar) => gsap.set(bar, { width: w }));
+      },
     });
+
     return () => trigger.kill();
   }, []);
 
-  // --- Menü Açılış Animasyonu ---
-  useEffect(() => {
-    if (isOpen && menuRef.current) {
-      gsap.fromTo(menuRef.current,
-        { opacity: 0, y: 10, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: 'power2.out' }
+  // Overlay + Menu animasyonu + ESC
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+
+    if (overlayRef.current) {
+      gsap.fromTo(
+        overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.18, ease: 'power2.out' }
       );
     }
+
+    if (menuRef.current) {
+      gsap.fromTo(
+        menuRef.current,
+        { opacity: 0, y: 10, scale: 0.98 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'power3.out' }
+      );
+    }
+
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
   }, [isOpen]);
 
-  const currentIndex = allProjects.findIndex(p => p.id === project.id) + 1;
+  const close = () => setIsOpen(false);
 
   return (
     <>
-      {/* GLOBAL CONTAINER 
-         Tüm sayfayı kaplar ama tıklamaları engellemez (pointer-events-none).
-         Sadece butonlar tıklanabilir olur.
-      */}
+      {/* GLOBAL CONTAINER */}
       <div className="fixed inset-0 z-[100] pointer-events-none flex flex-col justify-between p-4 md:p-8">
 
         {/* ---------------- DESKTOP NAVBAR (Top) ---------------- */}
-        <nav className="relative items-start justify-between hidden w-full md:flex">
-          
-          {/* Sol: Logo ve Hamburger */}
-          <div className="z-50 flex gap-4 pointer-events-auto">
-            <Link href="/" className="w-12 h-12 bg-[#1c1c1c] text-white flex items-center justify-center font-serif text-xl shadow-md transition-transform hover:scale-105">
-              MC
-            </Link>
-            {/* Hamburger Menü (İşlevsiz görsel) */}
-            <button className="flex items-center justify-center w-12 h-12 text-black transition-colors bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50">
-              <div className="flex flex-col gap-[5px]">
-                <span className="w-5 h-px bg-black"></span>
-                <span className="w-5 h-px bg-black"></span>
-              </div>
-            </button>
-          </div>
+        <nav className="relative items-start justify-center hidden w-full md:flex">
+          {/* Orta: Modern Control Bar */}
+          <div className="pointer-events-auto">
+            <div className="relative h-12 flex items-center gap-2 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] px-2">
+              {/* Prev */}
+              <Link
+                href={`/project/${prevProject.slug}`}
+                className="group h-10 w-10 rounded-full border border-black/10 bg-white flex items-center justify-center shadow-sm transition-transform hover:scale-[1.04]"
+                aria-label="Previous project"
+              >
+                <span className="text-[16px] leading-none translate-x-[-1px]">←</span>
+              </Link>
 
-          {/* Orta: Navigasyon Kontrolleri (Absolute Center) */}
-          {/* Absolute ile tam ortaya sabitliyoruz, böylece soldaki öğeler merkezi kaydırmaz */}
-          <div className="absolute top-0 z-40 flex items-center gap-3 -translate-x-1/2 pointer-events-auto left-1/2">
-            
-            {/* Previous Button */}
-            <Link 
-              href={`/project/${prevProject.slug}`} 
-              className="flex items-center justify-center h-12 px-5 font-sans text-sm font-medium text-black transition-all bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:px-7 whitespace-nowrap"
-            >
-               ← Prev
-            </Link>
+              {/* Portal */}
+              <button
+                onClick={() => setIsOpen((v) => !v)}
+                className="group relative h-10 min-w-[360px] rounded-full border border-black/10 bg-[#f7f7f7]/90 overflow-hidden px-4 flex items-center justify-between shadow-inner"
+                aria-expanded={isOpen}
+                aria-label="Open project list"
+              >
+                {/* progress underline */}
+                <div className="nav-progress-fill absolute left-0 bottom-0 h-[2px] w-0 bg-black/15" />
 
-            {/* Portal Button (Progress Bar & Dropdown) */}
-            <div className="relative">
-                <button 
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="relative h-12 min-w-[260px] pl-6 pr-5 bg-[#f5f5f5] rounded-full flex items-center justify-between overflow-hidden border border-gray-200 shadow-inner group transition-all hover:border-gray-300"
-                >
-                    {/* Arkaplan Progress Fill */}
-                    <div className="nav-progress-fill absolute top-0 left-0 h-full bg-[#e0e0e0] w-0 transition-none pointer-events-none" />
-                    
-                    {/* İçerik */}
-                    <div className="relative z-10 flex items-center justify-between w-full gap-4 text-black">
-                        <span className="w-8 font-serif text-lg font-medium text-left opacity-50">{toRoman(currentIndex)}</span>
-                        
-                        {/* Title - Truncate ile uzun isimleri kes */}
-                        <span className="font-serif text-lg tracking-tight truncate max-w-[150px] text-center">
-                            {project.title}
-                        </span>
-                        
-                        <span className={`transform transition-transform text-[10px] opacity-40 ml-1 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
-                    </div>
-                </button>
+                <div className="flex items-center min-w-0 gap-3">
+                  <span className="font-mono text-[11px] tracking-widest opacity-50 flex-shrink-0">
+                    {roman} / {toRoman(total)}
+                  </span>
 
-                {/* Desktop Dropdown Menü */}
-                {isOpen && (
-                    <div ref={menuRef} className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-[300px] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 py-6 max-h-[60vh] overflow-y-auto no-scrollbar text-black text-center">
-                        {allProjects.map((p, i) => (
-                            <Link 
-                                key={p.id} 
-                                href={`/project/${p.slug}`}
-                                className="block py-2 group"
-                            >
-                                <span className={`font-serif text-xl transition-all block ${p.id === project.id ? 'opacity-100 font-medium scale-105' : 'opacity-40 group-hover:opacity-80'}`}>
-                                    {p.title}
-                                    <sup className="ml-1 text-[9px] opacity-60 align-top">{toRoman(i + 1)}</sup>
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
-                )}
+                  <span className="flex-shrink-0 w-px h-4 bg-black/10" />
+
+                  <span className="font-serif text-[16px] tracking-tight truncate max-w-[220px]">
+                    {project.title}
+                  </span>
+                </div>
+
+                <div className="flex items-center flex-shrink-0 gap-2">
+                  <span className="text-[10px] opacity-50">LIST</span>
+                  <span
+                    className={`text-[10px] opacity-40 transform transition-transform ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                  >
+                    ▼
+                  </span>
+                </div>
+              </button>
+
+              {/* Next */}
+              <Link
+                href={`/project/${nextProject.slug}`}
+                className="group h-10 w-10 rounded-full border border-black/10 bg-white flex items-center justify-center shadow-sm transition-transform hover:scale-[1.04]"
+                aria-label="Next project"
+              >
+                <span className="text-[16px] leading-none translate-x-[1px]">→</span>
+              </Link>
             </div>
-
-            {/* Next Button */}
-            <Link 
-              href={`/project/${nextProject.slug}`} 
-              className="flex items-center justify-center h-12 px-5 font-sans text-sm font-medium text-black transition-all bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50 hover:px-7 whitespace-nowrap"
-            >
-               Next →
-            </Link>
           </div>
-
-          {/* Sağ taraf boşluk (Denge için) */}
-          <div className="hidden w-24 md:block"></div>
         </nav>
 
+        {/* ---------------- MOBILE NAVBAR (Bottom) ---------------- */}
+        <div className="w-full pb-4 pointer-events-auto md:hidden">
+          <div className="max-w-md mx-auto">
+            <div className="h-12 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] px-2 flex items-center gap-2">
+              <Link
+                href={`/project/${prevProject.slug}`}
+                className="flex items-center justify-center w-10 h-10 bg-white border rounded-full shadow-sm border-black/10 active:scale-95"
+                aria-label="Previous project"
+              >
+                ←
+              </Link>
 
-        {/* ---------------- MOBILE NAVBAR (Bottom Fixed) ---------------- */}
-        {/* Mobilde en alta sabitlenen alan */}
-        <div className="flex justify-center w-full pointer-events-auto md:hidden pb-safe-offset"> 
-        {/* pb-safe-offset: iPhone home bar için (eğer tailwind configde varsa, yoksa pb-4 yeterli) */}
-          
-          <div className="flex items-center w-full max-w-md gap-2 px-2">
-            
-            {/* Prev (Compact) */}
-            <Link href={`/project/${prevProject.slug}`} className="flex items-center justify-center flex-shrink-0 text-lg text-black transition-transform bg-white border border-gray-200 rounded-full shadow-lg w-11 h-11 active:scale-95">
-               ←
-            </Link>
+              <button
+                onClick={() => setIsOpen((v) => !v)}
+                className="relative flex-1 h-10 rounded-full border border-black/10 bg-[#f7f7f7]/90 overflow-hidden px-4 flex items-center justify-between shadow-inner min-w-0"
+                aria-expanded={isOpen}
+                aria-label="Open project list"
+              >
+                <div className="nav-progress-fill absolute left-0 bottom-0 h-[2px] w-0 bg-black/10" />
 
-            {/* Portal Button Mobile (Flexible Width) */}
-            <div className="relative flex-1 min-w-0"> {/* min-w-0: Flex item'ın taşmasını engeller */}
-                <button 
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="relative flex items-center justify-between w-full px-4 overflow-hidden border rounded-full shadow-lg h-11 bg-white/90 backdrop-blur-md border-white/20"
+                <div className="flex items-center min-w-0 gap-2">
+                  <span className="font-mono text-[10px] tracking-widest opacity-50 flex-shrink-0">
+                    {roman}
+                  </span>
+                  <span className="font-serif text-[14px] truncate text-center flex-1">
+                    {project.title}
+                  </span>
+                </div>
+
+                <span
+                  className={`text-[10px] opacity-40 transform transition-transform flex-shrink-0 ${
+                    isOpen ? 'rotate-180' : ''
+                  }`}
                 >
-                    {/* Mobile Progress Fill */}
-                    <div className="absolute top-0 left-0 w-0 h-full pointer-events-none nav-progress-fill bg-black/5" />
-                    
-                    {/* İçerik */}
-                    <div className="relative z-10 flex items-center w-full gap-2 overflow-hidden text-black">
-                        <span className="font-mono text-[10px] opacity-50 flex-shrink-0">{toRoman(currentIndex)}</span>
-                        
-                        {/* Proje Başlığı (Sığmazsa ... koyar) */}
-                        <span className="flex-1 font-serif text-base text-center truncate">
-                            {project.title}
-                        </span>
-                        
-                        <span className={`transform transition-transform text-[8px] text-black/40 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`}>▲</span>
-                    </div>
-                </button>
+                  ▲
+                </span>
+              </button>
 
-                 {/* Mobile Menü Popup (Yukarı açılır) */}
-                 {isOpen && (
-                    <div ref={menuRef} className="absolute bottom-full left-0 w-full mb-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-gray-100 py-6 max-h-[50vh] overflow-y-auto text-black z-50">
-                        {allProjects.map((p, i) => (
-                            <Link 
-                                key={p.id} 
-                                href={`/project/${p.slug}`}
-                                className="flex flex-col items-center py-2.5 text-center active:bg-gray-50"
-                            >
-                                <span className={`font-serif text-xl transition-all ${p.id === project.id ? 'text-black font-medium' : 'text-gray-400'}`}>
-                                    {p.title}
-                                    <sup className="ml-1 text-[9px] opacity-60">{toRoman(i + 1)}</sup>
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
-                )}
+              <Link
+                href={`/project/${nextProject.slug}`}
+                className="flex items-center justify-center w-10 h-10 bg-white border rounded-full shadow-sm border-black/10 active:scale-95"
+                aria-label="Next project"
+              >
+                →
+              </Link>
             </div>
-
-            {/* Next (Compact) */}
-            <Link href={`/project/${nextProject.slug}`} className="flex items-center justify-center flex-shrink-0 text-lg text-black transition-transform bg-white border border-gray-200 rounded-full shadow-lg w-11 h-11 active:scale-95">
-               →
-            </Link>
-
           </div>
         </div>
-
       </div>
+
+      {/* OVERLAY + MENU */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[110] pointer-events-auto">
+          <button
+            ref={overlayRef}
+            onClick={close}
+            className="absolute inset-0 bg-black/20 backdrop-blur-[2px]"
+            aria-label="Close menu"
+          />
+
+          {/* Desktop dropdown */}
+          <div className="hidden md:block">
+            <div
+              ref={menuRef}
+              className="absolute top-[90px] left-1/2 -translate-x-1/2 w-[380px]
+                         rounded-3xl border border-white/30 bg-white/90 backdrop-blur-2xl
+                         shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
+            >
+              <div className="px-6 pt-6 pb-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[11px] tracking-[0.22em] uppercase opacity-50">Projects</span>
+                  <span className="font-mono text-[11px] opacity-45">
+                    {currentIndex} / {total}
+                  </span>
+                </div>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto no-scrollbar pb-4">
+                {allProjects.map((p, i) => {
+                  const active = p.id === project.id;
+                  return (
+                    <Link
+                      key={p.id}
+                      href={`/project/${p.slug}`}
+                      onClick={close}
+                      className={`group block px-6 py-3 transition-colors ${
+                        active ? 'bg-black/[0.04]' : 'hover:bg-black/[0.03]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <div
+                            className={`font-serif text-[18px] tracking-tight truncate ${
+                              active ? 'text-black' : 'text-black/60 group-hover:text-black/85'
+                            }`}
+                          >
+                            {p.title}
+                          </div>
+                          <div className="text-[10px] tracking-[0.22em] uppercase opacity-40 mt-1">
+                            {toRoman(i + 1)}
+                          </div>
+                        </div>
+                        <div
+                          className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                            active ? 'bg-black/60' : 'bg-black/15 group-hover:bg-black/30'
+                          }`}
+                        />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile popup */}
+          <div className="md:hidden">
+            <div
+              ref={menuRef}
+              className="absolute left-1/2 -translate-x-1/2 bottom-24 w-[92%] max-w-md
+                         rounded-3xl border border-white/25 bg-white/92 backdrop-blur-2xl
+                         shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
+            >
+              <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
+                <span className="text-[11px] tracking-[0.22em] uppercase opacity-50">Projects</span>
+                <span className="font-mono text-[11px] opacity-45">
+                  {currentIndex} / {total}
+                </span>
+              </div>
+
+              <div className="max-h-[50vh] overflow-y-auto no-scrollbar pb-4">
+                {allProjects.map((p, i) => {
+                  const active = p.id === project.id;
+                  return (
+                    <Link
+                      key={p.id}
+                      href={`/project/${p.slug}`}
+                      onClick={close}
+                      className={`block px-5 py-3 transition-colors ${
+                        active ? 'bg-black/[0.04]' : 'active:bg-black/[0.03]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <div
+                            className={`font-serif text-[18px] tracking-tight truncate ${
+                              active ? 'text-black' : 'text-black/65'
+                            }`}
+                          >
+                            {p.title}
+                          </div>
+                          <div className="text-[10px] tracking-[0.22em] uppercase opacity-40 mt-1">
+                            {toRoman(i + 1)}
+                          </div>
+                        </div>
+                        <div className={`h-2 w-2 rounded-full ${active ? 'bg-black/60' : 'bg-black/15'}`} />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

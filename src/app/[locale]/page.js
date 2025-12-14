@@ -4,65 +4,63 @@ import { useTranslations } from 'next-intl';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Link from 'next/link';
-import ProjectList from './projects/components/ProjectList'; // Liste bileşeni import edildi
-import { projects } from '@/lib/data'; // Proje datası import edildi
+import ProjectList from './projects/components/ProjectList';
+import { projects } from '@/lib/data';
 
-// GSAP ScrollTrigger Eklentisini Kaydet
+import TextRevealScrub from '@/components/TextRevealScrub';
+
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export default function Home() {
   const t = useTranslations('Hero');
-  
+
   const mainRef = useRef(null);
   const heroRef = useRef(null);
   const videoContainerRef = useRef(null);
   const videoRef = useRef(null);
   const textRef = useRef(null);
 
-  // --- Sayfa Yüklenince En Üsten Başlat ---
-  // useLayoutEffect, boyama (paint) işleminden önce çalışır, titremeyi engeller.
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      
-      // --- HERO SCROLL ANIMASYONU ---
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: heroRef.current,
-          start: "top top",
-          end: "+=100%", // Scroll mesafesi
-          pin: true,     // Hero bölümünü ekrana çivile
-          scrub: 1,      // Scroll ile senkronize çalış
-        }
+          start: 'top top',
+          end: '+=100%',
+          pin: true,
+          scrub: 1,
+        },
       });
 
-      // 1. Videonun Genişlemesi
-      tl.fromTo(videoContainerRef.current, 
-        { 
-          clipPath: "inset(10% 20% 10% 20% round 10px)", 
-          scale: 0.95
+      tl.fromTo(
+        videoContainerRef.current,
+        {
+          clipPath: 'inset(10% 20% 10% 20% round 10px)',
+          scale: 0.95,
         },
-        { 
-          clipPath: "inset(0% 0% 0% 0% round 0px)", 
+        {
+          clipPath: 'inset(0% 0% 0% 0% round 0px)',
           scale: 1,
           duration: 1,
-          ease: "power2.inOut" 
+          ease: 'power2.inOut',
         }
-      )
-      // 2. Yazının Hareketi
-      .to(textRef.current, {
-        scale: 1.2,
-        y: -50,
-        opacity: 0,
-        duration: 0.5,
-        ease: "power1.in"
-      }, "<"); 
-
+      ).to(
+        textRef.current,
+        {
+          scale: 1.2,
+          y: -50,
+          opacity: 0,
+          duration: 0.5,
+          ease: 'power1.in',
+        },
+        '<'
+      );
     }, mainRef);
 
     return () => ctx.revert();
@@ -70,68 +68,62 @@ export default function Home() {
 
   return (
     <div ref={mainRef} className="text-black bg-white">
-      
-      {/* --- HERO SECTION (Sticky Video) --- */}
-      <div ref={heroRef} className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-white">
-        
-        {/* Yazı Katmanı */}
-        <div ref={textRef} className="absolute z-20 px-4 text-center text-white pointer-events-none mix-blend-difference">
+      <div
+        ref={heroRef}
+        className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-white"
+      >
+        <div
+          ref={textRef}
+          className="absolute z-20 px-4 text-center text-white pointer-events-none mix-blend-difference"
+        >
           <h1 className="text-[15vw] md:text-[12vw] font-black uppercase tracking-tighter leading-[0.8] mb-4">
             Umut
           </h1>
-          
         </div>
 
-        {/* Video Katmanı */}
         <div ref={videoContainerRef} className="relative z-10 w-full h-full">
-            <video 
-              ref={videoRef}
-              className="absolute top-0 left-0 object-cover w-full h-full"
-              autoPlay 
-              muted 
-              loop 
-              playsInline
-              poster="/assets/img1.jpg"
-            >
-              <source src="/assets/hero-video.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-black/20"></div>
+          <video
+            ref={videoRef}
+            className="absolute top-0 left-0 object-cover w-full h-full"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/assets/img1.jpg"
+          >
+            <source src="/assets/hero-video.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
-
       </div>
 
-      {/* --- LATEST PROJECTS (Liste Yapısı) --- */}
-      {/* Videodaki gibi Hero'nun hemen altında liste tarzı bölüm */}
       <div className="relative z-30 bg-[#f3f2ed] pt-20 pb-20">
-        
-        {/* Başlık */}
         <div className="px-6 mb-10 md:px-10">
-            <span className="font-mono text-xs tracking-widest uppercase opacity-40">Selected Works</span>
+          <span className="font-mono text-xs tracking-widest uppercase opacity-40">
+            Selected Works
+          </span>
         </div>
 
-        {/* Proje Listesi Bileşeni */}
-        <ProjectList projects={projects.slice(0, 4)} /> 
+        <ProjectList projects={projects.slice(0, 4)} />
 
-        {/* Tüm Projeler Butonu */}
         <div className="flex justify-center mt-20">
-            <Link href="/projects">
-                <button className="px-8 py-4 text-sm font-bold tracking-widest text-white uppercase transition-colors bg-black rounded-full hover:bg-zinc-800">
-                    View All Projects
-                </button>
-            </Link>
+          <Link href="/projects">
+            <button className="px-8 py-4 text-sm font-bold tracking-widest text-white uppercase transition-colors bg-black rounded-full hover:bg-zinc-800">
+              View All Projects
+            </button>
+          </Link>
         </div>
-
       </div>
 
-      {/* --- ABOUT / MANIFESTO (Siyah Bölüm) --- */}
       <div className="relative z-30 bg-[#0a0a0a] text-white py-32 px-6 md:px-10 min-h-[80vh] flex flex-col justify-center">
         <div className="max-w-[90%] mx-auto mb-24">
-          <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
-            We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
-          </h2>
+          <TextRevealScrub staggerEach={0.16} start="top 85%" end="bottom 15%">
+            <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
+              We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
+            </h2>
+          </TextRevealScrub>
         </div>
       </div>
-
     </div>
   );
 }
