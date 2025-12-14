@@ -2,37 +2,41 @@
 
 import './globals.css';
 import { NextIntlClientProvider } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import useScroll from '@/hooks/useScroll';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Preloader from '@/components/animation/Preloader';
-import PageTransition from '@/components/layout/PageTransition'; // Yeni import
-import { TransitionProvider } from '@/context/TransitionContext'; // Yeni import
+import PageTransition from '@/components/layout/PageTransition'; 
+import { TransitionProvider } from '@/context/TransitionContext'; 
 
 export default function LocaleLayout({ children, params: { locale } }) {
-  useScroll(); // Lenis burada çalışmaya devam ediyor
+  useScroll(); 
+  const pathname = usePathname();
 
   let messages;
   try { messages = require(`../../messages/${locale}.json`); } 
   catch (error) { messages = require(`../../messages/en.json`); }
+
+  // '/project/' URL'indeyiz ama '/projects' değilsek detay sayfasıdır.
+  const isProjectDetailPage = pathname.includes('/project/') && !pathname.includes('/projects');
 
   return (
     <html lang={locale}>
       <body className="antialiased bg-[#e3e3db] text-black">
         <NextIntlClientProvider locale={locale} messages={messages}>
           
-          <TransitionProvider> {/* Context tüm app'i sarmalı */}
-            
+          <TransitionProvider>
             <Preloader />
-            <PageTransition /> {/* Her sayfa değişiminde çalışacak perde */}
-            
+            <PageTransition />
             <Header />
             
             <main className="relative z-10 min-h-screen">
               {children}
             </main>
 
-            <Footer />
+            {/* Proje detay sayfalarında Global Footer GİZLENİR */}
+            {!isProjectDetailPage && <Footer />}
 
           </TransitionProvider>
 

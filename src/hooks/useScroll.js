@@ -12,7 +12,9 @@ export default function useScroll() {
       direction: 'vertical',
       smooth: true,
     });
+    
     setLenis(lenisInstance);
+    window.lenis = lenisInstance; // ✅ EKLEME: Global erişim için window'a ata
 
     function raf(time) {
       lenisInstance.raf(time);
@@ -20,7 +22,10 @@ export default function useScroll() {
     }
     requestAnimationFrame(raf);
 
-    return () => lenisInstance.destroy();
+    return () => {
+      lenisInstance.destroy();
+      window.lenis = null; // ✅ Temizlik
+    };
   }, []);
 
   return lenis;
