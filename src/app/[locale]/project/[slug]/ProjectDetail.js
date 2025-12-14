@@ -25,12 +25,10 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
 
   // --- Sayfa Başlangıç Ayarları ---
   useEffect(() => {
-    // Tarayıcı scroll hafızasını kapat
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
 
-    // Lenis scroll'u en başa al (Sayfa en üstten başlasın)
     if (window.lenis) {
       window.lenis.scrollTo(0, { immediate: true });
     } else {
@@ -39,56 +37,46 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
 
     ScrollTrigger.refresh();
     
-    // Geçiş kilidini 1.2 sn sonra aç (Kullanıcı hemen aşağı kaydırıp geçmesin diye güvenlik)
     const timer = setTimeout(() => {
         setCanAdvance(true);
     }, 1200);
 
-    // NOT: Buradaki tüm giriş animasyonları kaldırıldı.
-    // Başlık ve yazılar CSS ile doğal hallerinde direkt görünür olacak.
-
     return () => clearTimeout(timer);
   }, [project.id]);
 
-  // --- Scroll Logic & Transition (Footer Geçişi) ---
+  // --- Scroll Logic & Transition ---
   useEffect(() => {
     const ctx = gsap.context(() => {
       
       ScrollTrigger.create({
         trigger: footerRef.current,
         start: "top top", 
-        // Geçiş mesafesi
         end: `+=${typeof window !== 'undefined' ? window.innerHeight * 1.5 : 1000}px`,
-        pin: true,        // Footer'ı ekrana kilitle (Yazı ortada kalsın)
+        pin: true,        
         pinSpacing: true,
         scrub: 0,
         
         onUpdate: (self) => {
-          // Progress Bar
           if (nextProjectProgressBarRef.current && shouldUpdateProgress) {
             gsap.set(nextProjectProgressBarRef.current, {
               scaleX: self.progress,
             });
           }
 
-          // Tetiklenme Noktası (%99)
           if (self.progress >= 0.99 && !isTransitioning && canAdvance) {
             setShouldUpdateProgress(false);
             setIsTransitioning(true);
 
             const tl = gsap.timeline();
 
-            // 1. Barı doldur
             tl.set(nextProjectProgressBarRef.current, { scaleX: 1 });
 
-            // 2. Beyaz Perdeyi Aç (Metnin arkasında)
             tl.to(overlayRef.current, {
               opacity: 1,
               duration: 0.8,
               ease: "power2.inOut"
             });
 
-            // 3. Sayfayı Değiştir
             tl.call(() => {
               router.push(`/project/${nextProject.slug}`);
             });
@@ -101,9 +89,11 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
     return () => ctx.revert();
   }, [nextProject, router, isTransitioning, shouldUpdateProgress, canAdvance]);
 
-  // Stil Tanımları
-  const heroClasses = "w-full min-h-screen flex flex-col justify-center items-center px-6 text-center relative z-10";
-  const titleClasses = "text-[10vw] font-medium uppercase leading-[0.85] tracking-tight mb-8 text-black";
+  // --- ORTAK STİLLER ---
+  // h-[100dvh]: Mobilde adres çubuğunu hesaba katan dinamik yükseklik.
+  // justify-center items-center: İçerideki h1'i tam ortaya kilitler.
+  const containerClasses = "w-full h-[100dvh] flex flex-col justify-center items-center px-6 text-center relative overflow-hidden";
+  const titleClasses = "text-[10vw] font-medium uppercase leading-[0.85] tracking-tight text-black z-10 relative";
 
   return (
     <div className="relative min-h-screen bg-[#f3f2ed] text-[#1c1c1c] font-sans selection:bg-black selection:text-white">
@@ -122,18 +112,22 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
       />
 
       {/* --- HERO SECTION --- */}
-      {/* Animasyon class'ı (project-hero-anim) kalsa da JS kodu olmadığı için etkisi yok */}
-      <div className={heroClasses}>
+      <div className={`${containerClasses} z-10`}>
+        {/* BAŞLIK: Flex sayesinde tam ortada */}
         <h1 className={titleClasses}>
           {project.title}
         </h1>
-        <p className="max-w-2xl text-xl leading-relaxed opacity-60">
-          {project.description}
-        </p>
-        <div className="flex gap-8 mt-12 font-mono text-xs tracking-widest uppercase opacity-40">
-            <span>{project.category}</span>
-            <span>—</span>
-            <span>{project.year}</span>
+
+        {/* YARDIMCI İÇERİK: Absolute ile alta sabitlendi, başlığı itmez. */}
+        <div className="absolute left-0 z-10 flex flex-col items-center w-full gap-6 px-6 bottom-16 md:bottom-24">
+            <p className="max-w-2xl text-xl leading-relaxed opacity-60">
+            {project.description}
+            </p>
+            <div className="flex gap-8 font-mono text-xs tracking-widest uppercase opacity-40">
+                <span>{project.category}</span>
+                <span>—</span>
+                <span>{project.year}</span>
+            </div>
         </div>
       </div>
 
@@ -163,16 +157,18 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
       </div>
 
       {/* --- NEXT PROJECT FOOTER --- */}
-      <div ref={footerRef} className={`${heroClasses} z-[50] bg-[#f3f2ed]`}>
+      <div ref={footerRef} className={`${containerClasses} z-[50] bg-[#f3f2ed]`}>
         
-        <div className="flex flex-col items-center w-full gap-4 project-footer-content">
-            <span className="mb-4 project-footer-copy opacity-60">Next Project</span>
-            
-            {/* HERO TITLE İLE AYNI */}
-            <h1 className={titleClasses}>
-              {nextProject.title}
-            </h1>
-        </div>
+        {/* YARDIMCI İÇERİK: Absolute ile üste sabitlendi, başlığı itmez. */}
+        {/* Mobilde başlığın üstüne binmemesi için top-32 veya %20 gibi bir değer verdik. */}
+        <span className="absolute top-[20%] md:top-32 mb-4 project-footer-copy opacity-60">
+            Next Project
+        </span>
+        
+        {/* BAŞLIK: Flex sayesinde tam ortada (Hero ile birebir aynı konumda) */}
+        <h1 className={titleClasses}>
+            {nextProject.title}
+        </h1>
 
         {/* PROGRESS BAR */}
         <div className="absolute bottom-0 left-0 w-full h-2 bg-gray-300/50">

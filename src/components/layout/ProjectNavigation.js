@@ -151,7 +151,8 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
         </nav>
 
         {/* ---------------- MOBILE NAVBAR (Bottom) ---------------- */}
-        <div className="w-full pb-4 pointer-events-auto md:hidden">
+        {/* Burada mt-10 eklendi, sadece mobilde çalışacak */}
+        <div className="w-full pb-4 mt-16 pointer-events-auto md:hidden">
           <div className="max-w-md mx-auto">
             <div className="h-12 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] px-2 flex items-center gap-2">
               <Link
@@ -215,8 +216,8 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
             <div
               ref={menuRef}
               className="absolute top-[90px] left-1/2 -translate-x-1/2 w-[380px]
-                         rounded-3xl border border-white/30 bg-white/90 backdrop-blur-2xl
-                         shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
+                          rounded-3xl border border-white/30 bg-white/90 backdrop-blur-2xl
+                          shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
             >
               <div className="px-6 pt-6 pb-4">
                 <div className="flex items-baseline justify-between">
@@ -270,8 +271,8 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
             <div
               ref={menuRef}
               className="absolute left-1/2 -translate-x-1/2 bottom-24 w-[92%] max-w-md
-                         rounded-3xl border border-white/25 bg-white/92 backdrop-blur-2xl
-                         shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
+                          rounded-3xl border border-white/25 bg-white/92 backdrop-blur-2xl
+                          shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
             >
               <div className="flex items-baseline justify-between px-5 pt-5 pb-3">
                 <span className="text-[11px] tracking-[0.22em] uppercase opacity-50">Projects</span>
