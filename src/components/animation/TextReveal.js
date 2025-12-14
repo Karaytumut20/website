@@ -1,34 +1,86 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SplitType from 'split-type';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function TextReveal({ children, className = "", delay = 0 }) {
+export default function TextRevealScrub({
+  children,
+  className = "",
+  delay = 0,
+  spread = 900,        // scroll mesafesi (büyüdükçe daha yavaş açılır)
+  staggerEach = 0.12,  // büyüdükçe aynı anda daha az kelime açılır
+  scrub = 0.6,         // 0.3-1 arası “smooth” hissiyat
+}) {
   const elRef = useRef(null);
 
-  useEffect(() => {
-    const text = new SplitType(elRef.current, { types: 'chars,words' });
-    gsap.set(text.chars, { y: 100, opacity: 0 });
+  useLayoutEffect(() => {
+    if (!elRef.current) return;
 
-    gsap.to(text.chars, {
-      y: 0,
-      opacity: 1,
-      duration: 1,
-      stagger: 0.02,
-      delay: delay,
-      ease: 'power4.out',
-      scrollTrigger: {
-        trigger: elRef.current,
-        start: 'top 85%',
-        toggleActions: 'play none none reverse'
-      }
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    if (reduced) return;
+
+    let split;
+    let tl;
+
+    const build = () => {
+      split?.revert();
+      tl?.kill();
+
+      split = new SplitType(elRef.current, { types: 'words' });
+
+      // kelimeleri inline-block yap (transform düzgün çalışsın)
+      split.words.forEach(w => {
+        w.style.display = "inline-block";
+        w.style.willChange = "transform, opacity";
+      });
+
+      gsap.set(split.words, { opacity: 0, y: 18, rotateX: -35, transformOrigin: "50% 100%" });
+      gsap.set(elRef.current, { perspective: 800 });
+
+      tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: elRef.current,
+          start: "top 85%",
+          end: `+=${spread}`,
+          scrub,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      tl.to(split.words, {
+        opacity: 1,
+        y: 0,
+        rotateX: 0,
+        ease: "none", // scrub için en doğal
+        duration: 1,
+        stagger: { each: staggerEach, from: "start" },
+        delay,
+        overwrite: true,
+      });
+    };
+
+    build();
+
+    // responsive: satır kırılımları değişince tekrar split et
+    const ro = new ResizeObserver(() => {
+      build();
+      ScrollTrigger.refresh();
     });
+    ro.observe(elRef.current);
 
-    return () => text.revert();
-  }, [delay]);
+    return () => {
+      ro.disconnect();
+      tl?.scrollTrigger?.kill();
+      tl?.kill();
+      split?.revert();
+    };
+  }, [delay, spread, staggerEach, scrub]);
 
   return (
     <div ref={elRef} className={className}>
