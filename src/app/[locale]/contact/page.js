@@ -164,9 +164,9 @@ Best regards.`;
                <div className="space-y-4 md:space-y-2">
                  <span className="opacity-40">Hi, my name is</span>
                  <input name="name" value={formData.name} onChange={handleChange} type="text" placeholder="your name" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[300px] px-2 text-black placeholder:text-black/20 transition-colors"/>
-                 <span className="opacity-40">. I'm from</span>
+                 <span className="opacity-40">. I&apos;m from</span>
                  <input name="city" value={formData.city} onChange={handleChange} type="text" placeholder="city/country" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[250px] px-2 text-black placeholder:text-black/20 transition-colors"/>
-                 <span className="opacity-40">. I'd like to talk about a</span>
+                 <span className="opacity-40">. I&apos;d like to talk about a</span>
                  <input name="project" value={formData.project} onChange={handleChange} type="text" placeholder="project type" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[400px] px-2 text-black placeholder:text-black/20 transition-colors"/>
                  <span className="opacity-40">project. You can reach me at</span>
                  <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="your email" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[350px] px-2 text-black placeholder:text-black/20 transition-colors"/>
@@ -174,11 +174,11 @@ Best regards.`;
                </div>
             ) : (
                <div className="space-y-4 md:space-y-2">
-                 <span className="opacity-40">Hello, I'm</span>
+                 <span className="opacity-40">Hello, I&apos;m</span>
                  <input name="name" value={formData.name} onChange={handleChange} type="text" placeholder="your name" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[300px] px-2 text-black placeholder:text-black/20 transition-colors"/>
                  <span className="opacity-40">. I specialize in</span>
                  <input name="role" value={formData.role} onChange={handleChange} type="text" placeholder="your role" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[350px] px-2 text-black placeholder:text-black/20 transition-colors"/>
-                 <span className="opacity-40">and I'd love to join the team. Check out my portfolio at</span>
+                 <span className="opacity-40">and I&apos;d love to join the team. Check out my portfolio at</span>
                  <input name="portfolio" value={formData.portfolio} onChange={handleChange} type="url" placeholder="portfolio url" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[400px] px-2 text-black placeholder:text-black/20 transition-colors"/>
                  <span className="opacity-40">. Contact me at</span>
                  <input name="email" value={formData.email} onChange={handleChange} type="email" placeholder="your email" required className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[350px] px-2 text-black placeholder:text-black/20 transition-colors"/>
