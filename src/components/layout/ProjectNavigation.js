@@ -71,9 +71,10 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
     }
 
     if (menuRef.current) {
+      // Mobilde menü alttan yukarı doğru açılmalı (y: 10 -> y: 0)
       gsap.fromTo(
         menuRef.current,
-        { opacity: 0, y: 10, scale: 0.98 },
+        { opacity: 0, y: 20, scale: 0.95 },
         { opacity: 1, y: 0, scale: 1, duration: 0.22, ease: 'power3.out' }
       );
     }
@@ -88,11 +89,11 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
   return (
     <>
       {/* GLOBAL CONTAINER */}
+      {/* h-screen veya fixed inset-0 ile tam ekranı kaplıyor, flex ile içeriği dağıtıyoruz */}
       <div className="fixed inset-0 z-[100] pointer-events-none flex flex-col justify-between p-4 md:p-8">
 
         {/* ---------------- DESKTOP NAVBAR (Top) ---------------- */}
         <nav className="relative items-start justify-center hidden w-full md:flex">
-          {/* Orta: Modern Control Bar */}
           <div className="pointer-events-auto">
             <div className="relative h-12 flex items-center gap-2 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] px-2">
               {/* Prev */}
@@ -111,16 +112,13 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
                 aria-expanded={isOpen}
                 aria-label="Open project list"
               >
-                {/* progress underline */}
                 <div className="nav-progress-fill absolute left-0 bottom-0 h-[2px] w-0 bg-black/15" />
 
                 <div className="flex items-center min-w-0 gap-3">
                   <span className="font-mono text-[11px] tracking-widest opacity-50 flex-shrink-0">
                     {roman} / {toRoman(total)}
                   </span>
-
                   <span className="flex-shrink-0 w-px h-4 bg-black/10" />
-
                   <span className="font-serif text-[16px] tracking-tight truncate max-w-[220px]">
                     {project.title}
                   </span>
@@ -151,8 +149,8 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
         </nav>
 
         {/* ---------------- MOBILE NAVBAR (Bottom) ---------------- */}
-        {/* Burada mt-10 eklendi, sadece mobilde çalışacak */}
-        <div className="w-full pb-4 mt-16 pointer-events-auto md:hidden">
+        {/* DEĞİŞİKLİK: mt-16 kaldırıldı, mt-auto eklendi. Bu class elemanı en alta iter. */}
+        <div className="w-full pb-2 mt-auto pointer-events-auto md:hidden">
           <div className="max-w-md mx-auto">
             <div className="h-12 rounded-full border border-black/10 bg-white/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.12)] px-2 flex items-center gap-2">
               <Link
@@ -211,7 +209,7 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
             aria-label="Close menu"
           />
 
-          {/* Desktop dropdown */}
+          {/* Desktop dropdown (Üstte) */}
           <div className="hidden md:block">
             <div
               ref={menuRef}
@@ -219,7 +217,8 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
                           rounded-3xl border border-white/30 bg-white/90 backdrop-blur-2xl
                           shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
             >
-              <div className="px-6 pt-6 pb-4">
+               {/* Desktop Menu Content (Same as before) */}
+               <div className="px-6 pt-6 pb-4">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[11px] tracking-[0.22em] uppercase opacity-50">Projects</span>
                   <span className="font-mono text-[11px] opacity-45">
@@ -227,7 +226,6 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
                   </span>
                 </div>
               </div>
-
               <div className="max-h-[60vh] overflow-y-auto no-scrollbar pb-4">
                 {allProjects.map((p, i) => {
                   const active = p.id === project.id;
@@ -266,10 +264,11 @@ export default function ProjectNavigation({ project, nextProject, prevProject, a
             </div>
           </div>
 
-          {/* Mobile popup */}
+          {/* Mobile popup (Altta) */}
           <div className="md:hidden">
             <div
               ref={menuRef}
+              // DEĞİŞİKLİK: bottom-24 ile menüyü navbarın hemen üstünde açıyoruz
               className="absolute left-1/2 -translate-x-1/2 bottom-24 w-[92%] max-w-md
                           rounded-3xl border border-white/25 bg-white/92 backdrop-blur-2xl
                           shadow-[0_30px_80px_rgba(0,0,0,0.22)] overflow-hidden"
