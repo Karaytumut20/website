@@ -8,79 +8,63 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function TextRevealScrub({
   children,
-  className = "",
+  className = '',
   delay = 0,
-  spread = 900,        // scroll mesafesi (büyüdükçe daha yavaş açılır)
-  staggerEach = 0.12,  // büyüdükçe aynı anda daha az kelime açılır
-  scrub = 0.6,         // 0.3-1 arası “smooth” hissiyat
+  reveal = 'words',       // 'words' | 'chars' (chars daha ağır)
+  spread = 900,           // desktop'ta scroll mesafesi
+  staggerEach = 0.12,     // aynı anda kaç kelime açılacak hissi
+  scrub = 0.6,            // 0.3-1 arası daha “smooth”
 }) {
   const elRef = useRef(null);
 
   useLayoutEffect(() => {
     if (!elRef.current) return;
 
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-
-    if (reduced) return;
-
-    let split;
-    let tl;
-
-    const build = () => {
-      split?.revert();
-      tl?.kill();
-
-      split = new SplitType(elRef.current, { types: 'words' });
-
-      // kelimeleri inline-block yap (transform düzgün çalışsın)
-      split.words.forEach(w => {
-        w.style.display = "inline-block";
-        w.style.willChange = "transform, opacity";
+    const ctx = gsap.context(() => {
+      const split = new SplitType(elRef.current, {
+        types: reveal === 'chars' ? 'chars,words' : 'words',
       });
 
-      gsap.set(split.words, { opacity: 0, y: 18, rotateX: -35, transformOrigin: "50% 100%" });
-      gsap.set(elRef.current, { perspective: 800 });
+      const targets = reveal === 'chars' ? split.chars : split.words;
 
-      tl = gsap.timeline({
+      // Başlangıç state
+      gsap.set(targets, { y: 28, opacity: 0, filter: 'blur(6px)' });
+
+      const calcEnd = () => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const isMobile = vw < 768;
+
+        // mobilde daha kısa scroll ile bitsin:
+        const scaled = spread * (isMobile ? 0.45 : 1);
+        const minEnd = isMobile ? Math.min(520, vh * 1.05) : Math.min(900, vh * 1.35);
+
+        return Math.max(minEnd, scaled);
+      };
+
+      gsap.to(targets, {
+        y: 0,
+        opacity: 1,
+        filter: 'blur(0px)',
+        ease: 'none', // scrub'da en iyi bu
+        stagger: staggerEach,
+        delay,
         scrollTrigger: {
           trigger: elRef.current,
-          start: "top 85%",
-          end: `+=${spread}`,
+          start: () => (window.innerWidth < 768 ? 'top 92%' : 'top 85%'),
+          end: () => `+=${calcEnd()}`,
           scrub,
           invalidateOnRefresh: true,
         },
       });
 
-      tl.to(split.words, {
-        opacity: 1,
-        y: 0,
-        rotateX: 0,
-        ease: "none", // scrub için en doğal
-        duration: 1,
-        stagger: { each: staggerEach, from: "start" },
-        delay,
-        overwrite: true,
-      });
-    };
+      return () => {
+        split.revert();
+      };
+    }, elRef);
 
-    build();
-
-    // responsive: satır kırılımları değişince tekrar split et
-    const ro = new ResizeObserver(() => {
-      build();
-      ScrollTrigger.refresh();
-    });
-    ro.observe(elRef.current);
-
-    return () => {
-      ro.disconnect();
-      tl?.scrollTrigger?.kill();
-      tl?.kill();
-      split?.revert();
-    };
-  }, [delay, spread, staggerEach, scrub]);
+    return () => ctx.revert();
+  }, [delay, reveal, spread, staggerEach, scrub]);
 
   return (
     <div ref={elRef} className={className}>
