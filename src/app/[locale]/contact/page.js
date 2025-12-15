@@ -208,6 +208,7 @@ Best regards.`;
                {/* 3. Apple Mail / Default (App) */}
                <button onClick={handleDefaultMail} className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase transition-opacity border-b border-transparent opacity-50 hover:opacity-100 hover:border-black">
                  Open Mail App
+                 
                </button>
 
                 {/* 4. Copy Text */}
