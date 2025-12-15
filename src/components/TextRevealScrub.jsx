@@ -10,114 +10,82 @@ if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 export default function TextRevealScrub({
   children,
   className = '',
-  delay = 0,
-
-  // büyüt -> daha seyrek (az kelime)
-  staggerEach = 0.16,
-
-  start = 'top 85%',
-  end = 'bottom 15%',
+  // "Başta bir çoğu yüklü gelsin" dediğin için start noktasını erken,
+  // end noktasını da kısa tuttum. Böylece çabucak netleşir.
+  start = 'top 90%', 
+  end = 'bottom 60%', 
 }) {
   const elRef = useRef(null);
 
   useLayoutEffect(() => {
     if (!elRef.current) return;
 
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-
-    if (reduced) return;
-
     const el = elRef.current;
-
     let split = null;
-    let st = null;
+    let anim = null; // Animasyonu referans olarak tutalım
 
     const buildSplit = () => {
+      // Önce temizlik
       if (split) split.revert();
-      split = new SplitType(el, { types: 'words' });
+      
+      split = new SplitType(el, { types: 'words, chars' }); // chars ile daha akıcı olur
 
+      // Kelimelere stil verelim
       split.words.forEach((w) => {
         w.style.display = 'inline-block';
-        w.style.willChange = 'transform, opacity';
+        w.style.willChange = 'opacity, transform';
       });
-
-      gsap.set(el, { perspective: 900 });
+      
+      // Animasyonu başlatalım
+      runAnimation();
     };
 
-    const setHidden = () => {
+    const runAnimation = () => {
       if (!split) return;
-      gsap.set(split.words, {
-        opacity: 0,
-        y: 18,
-        rotateX: -35,
-        transformOrigin: '50% 100%',
-      });
-    };
+      
+      // Eski animasyon varsa temizle
+      if (anim) anim.kill();
 
-    const animateIn = () => {
-      if (!split) return;
-      gsap.killTweensOf(split.words);
-
-      setHidden(); // her girişte sıfırdan
-
-      gsap.to(split.words, {
-        opacity: 1,
-        y: 0,
-        rotateX: 0,
-        duration: 0.52, // ✅ daha hızlı
-        ease: 'power3.out',
-        delay,
-        stagger: { each: Math.max(0.06, staggerEach * 0.75), from: 'start' }, // ✅ daha hızlı
-        overwrite: true,
-      });
-    };
-
-    const animateOut = () => {
-      if (!split) return;
-      gsap.killTweensOf(split.words);
-
-      gsap.to(split.words, {
-        opacity: 0,
-        y: -10,
-        rotateX: 20,
-        duration: 0.26, // ✅ daha hızlı
-        ease: 'power2.out',
-        stagger: { each: Math.max(0.01, staggerEach * 0.35), from: 'end' },
-        overwrite: true,
-      });
+      // --- İŞTE İSTEDİĞİN AYARLAR BURADA ---
+      anim = gsap.fromTo(
+        split.words, 
+        {
+          opacity: 0.25,  // Püf Noktası 1: 0 değil, 0.25. Yani başta silik de olsa GÖRÜNÜYOR.
+          y: 8,           // Püf Noktası 2: Çok aşağıda değil, sadece hafifçe (8px) aşağıda.
+          rotateX: 0,     // 3D dönüşü kapattım veya çok aza indirdim ki "hafif" olsun.
+          color: "#999"   // Opsiyonel: Başta gri başlayıp siyaha/beyaza dönebilir.
+        },
+        {
+          opacity: 1,     // Tam netleşiyor
+          y: 0,           // Yerine oturuyor
+          color: "inherit", // Orijinal rengine dönüyor
+          stagger: 0.1,   // Soldan sağa dalga efekti
+          ease: 'none',   // Scrub kullanırken genelde 'none' kullanılır (akıcı olsun diye)
+          scrollTrigger: {
+            trigger: el,
+            start: start,
+            end: end,
+            scrub: 1,     // Püf Noktası 3: Kaydırmaya bağladık. (1 sn yumuşatma payı var)
+          }
+        }
+      );
     };
 
     buildSplit();
-    setHidden();
 
-    st = ScrollTrigger.create({
-      trigger: el,
-      start,
-      end,
-      onEnter: animateIn,
-      onEnterBack: animateIn,
-      onLeaveBack: animateOut,
-      onLeave: animateOut, // istemezsen sil
-    });
-
+    // Ekran boyutu değişirse yeniden hesapla
     const ro = new ResizeObserver(() => {
       buildSplit();
-      setHidden();
       ScrollTrigger.refresh();
     });
     ro.observe(el);
 
     return () => {
       ro.disconnect();
-      st?.kill();
-      if (split) {
-        gsap.killTweensOf(split.words);
-        split.revert();
-      }
+      if (anim) anim.kill();
+      if (split) split.revert();
     };
-  }, [delay, staggerEach, start, end]);
+  }, [start, end]);
 
   return (
     <div ref={elRef} className={className}>

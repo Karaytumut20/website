@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react'; // useEffect eklendi
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 export default function ContactPage() {
   const [activeTab, setActiveTab] = useState('book');
+  const [isMobile, setIsMobile] = useState(false); // Mobil kontrolü için state
   const [btnText, setBtnText] = useState({
     icloud: 'Send via iCloud',
     copy: 'Copy Message'
@@ -25,6 +26,16 @@ export default function ContactPage() {
   
   const myEmailAddress = "umutkaraytu20@gmail.com"; 
 
+  // Cihazın mobil olup olmadığını anlayan basit kontrol
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      if (/android|iPad|iPhone|iPod/i.test(userAgent)) {
+        setIsMobile(true);
+      }
+    }
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -35,70 +46,86 @@ export default function ContactPage() {
 
     if (activeTab === 'book') {
       subject = `Project Inquiry: ${formData.project} - ${formData.name}`;
-      body = `Hi Umut,
-
-My name is ${formData.name || '[Name]'}. 
-I'm from ${formData.city || '[Location]'}.
-I'd like to talk about a ${formData.project || '[Project Type]'} project.
-You can reach me at: ${formData.email || '[Email]'}
-
-Looking forward to hearing from you.`;
+      body = `Hi Umut,\n\nMy name is ${formData.name || '[Name]'}. \nI'm from ${formData.city || '[Location]'}.\nI'd like to talk about a ${formData.project || '[Project Type]'} project.\nYou can reach me at: ${formData.email || '[Email]'}\n\nLooking forward to hearing from you.`;
     } else {
       subject = `Career Application: ${formData.role} - ${formData.name}`;
-      body = `Hi Umut,
-
-My name is ${formData.name || '[Name]'}.
-I specialize in ${formData.role || '[Role]'}.
-I'd love to join the team. You can check out my portfolio at:
-${formData.portfolio || '[Portfolio URL]'}
-
-Contact me at: ${formData.email || '[Email]'}
-
-Best regards.`;
+      body = `Hi Umut,\n\nMy name is ${formData.name || '[Name]'}.\nI specialize in ${formData.role || '[Role]'}.\nI'd love to join the team. You can check out my portfolio at:\n${formData.portfolio || '[Portfolio URL]'}\n\nContact me at: ${formData.email || '[Email]'}\n\nBest regards.`;
     }
     return { subject, body };
   };
 
-  // 1. GMAIL (Tam Otomatik)
+  // 1. GMAIL (Akıllı Link)
   const handleGmail = (e) => {
     e.preventDefault();
     const { subject, body } = generateMailContent();
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${myEmailAddress}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(gmailUrl, '_blank');
+
+    // Satır sonlarını güvenli hale getir
+    const safeSubject = encodeURIComponent(subject);
+    const safeBody = encodeURIComponent(body); // \n karakterlerini %0A'ya çevirir
+
+    if (isMobile) {
+      // Mobildeyse: Gmail uygulamasını zorlamak için mailto kullanır ama gmail spesifik denenebilir
+      // Ancak en garantisi standart mailto'dur, çünkü Android/iOS kullanıcıyı yönlendirir.
+      // Yine de "Gmail" butonu olduğu için Google'ın web view linki mobilde bazen sorun çıkarır.
+      // Mobilde en temiz yöntem:
+      const gmailAppUrl = `googlegmail:///co?to=${myEmailAddress}&subject=${safeSubject}&body=${safeBody}`;
+      
+      // Önce app linkini dener, çalışmazsa web'e düşmesi için window.open kullanılır
+      // Ancak React tarafında bu karmaşık olabilir. En güvenli mobil web linki:
+      window.open(`https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${myEmailAddress}&su=${safeSubject}&body=${safeBody}`, '_blank');
+    } else {
+      // Masaüstü: Standart Web Linki
+      window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${myEmailAddress}&su=${safeSubject}&body=${safeBody}`, '_blank');
+    }
   };
 
-  // 2. ICLOUD WEB (Otomatik Kopyala + Siteyi Aç)
-  const handleICloudWeb = (e) => {
+  // 2. ICLOUD WEB (Kopyala + Aç)
+  const handleICloudWeb = async (e) => {
     e.preventDefault();
     const { body } = generateMailContent();
     
-    // Önce metni kopyala
-    navigator.clipboard.writeText(body).then(() => {
-        // Kullanıcıya bilgi ver
-        setBtnText(prev => ({ ...prev, icloud: 'Text Copied! Opening iCloud...' }));
-        
-        // 1.5 saniye sonra siteyi aç ve butonu eski haline getir
-        setTimeout(() => {
-            window.open('https://www.icloud.com/mail/', '_blank');
-            setBtnText(prev => ({ ...prev, icloud: 'Send via iCloud' }));
-        }, 1500);
-    });
+    try {
+      await navigator.clipboard.writeText(body);
+      setBtnText(prev => ({ ...prev, icloud: 'Copied! Opening iCloud...' }));
+      
+      setTimeout(() => {
+        // iCloud Compose için doğrudan bir URL şeması yoktur, inbox'ı açarız.
+        window.open('https://www.icloud.com/mail/', '_blank');
+        setBtnText(prev => ({ ...prev, icloud: 'Send via iCloud' }));
+      }, 1500);
+    } catch (err) {
+      console.error('Copy failed', err);
+      // Kopyalama başarısız olsa bile siteyi aç
+      window.open('https://www.icloud.com/mail/', '_blank');
+    }
   };
 
-  // 3. APPLE MAIL APP / DEFAULT (Bilgisayardaki Uygulamayı Açar - Tam Otomatik)
+  // 3. DEFAULT MAIL APP (En Garantisi - iOS Mail, Outlook vb.)
   const handleDefaultMail = (e) => {
     e.preventDefault();
     const { subject, body } = generateMailContent();
-    window.location.href = `mailto:${myEmailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // mailto linklerinde satır atlaması için encodeURIComponent yeterlidir ancak 
+    // bazı eski istemciler için manuel %0D%0A daha güvenlidir.
+    const safeSubject = encodeURIComponent(subject);
+    const safeBody = encodeURIComponent(body).replace(/%0A/g, '%0D%0A'); // \n -> \r\n dönüşümü
+
+    // window.open yerine window.location.href mobilde daha kararlıdır
+    window.location.href = `mailto:${myEmailAddress}?subject=${safeSubject}&body=${safeBody}`;
   };
 
   // 4. SADECE KOPYALA
   const handleCopyText = (e) => {
     e.preventDefault();
     const { body } = generateMailContent();
-    navigator.clipboard.writeText(body);
-    setBtnText(prev => ({ ...prev, copy: 'Message Copied!' }));
-    setTimeout(() => setBtnText(prev => ({ ...prev, copy: 'Copy Message' })), 2000);
+    navigator.clipboard.writeText(body)
+      .then(() => {
+        setBtnText(prev => ({ ...prev, copy: 'Message Copied!' }));
+        setTimeout(() => setBtnText(prev => ({ ...prev, copy: 'Copy Message' })), 2000);
+      })
+      .catch(() => {
+        setBtnText(prev => ({ ...prev, copy: 'Error Copying' }));
+      });
   };
   
   // GSAP Animasyonları
@@ -197,7 +224,7 @@ Best regards.`;
                   <div className="absolute inset-0 transition-transform duration-300 ease-out origin-left transform scale-x-0 bg-white group-hover:scale-x-100"></div>
                </button>
 
-               {/* 2. iCloud (Web) - YENİ */}
+               {/* 2. iCloud (Web) */}
                <button onClick={handleICloudWeb} className="relative px-8 py-4 overflow-hidden text-black bg-transparent border border-black rounded-sm cursor-pointer group">
                   <span className="relative z-10 text-lg font-bold tracking-widest uppercase transition-colors duration-300 group-hover:text-white">
                     {btnText.icloud}
@@ -208,7 +235,6 @@ Best regards.`;
                {/* 3. Apple Mail / Default (App) */}
                <button onClick={handleDefaultMail} className="flex items-center gap-2 text-sm font-bold tracking-widest uppercase transition-opacity border-b border-transparent opacity-50 hover:opacity-100 hover:border-black">
                  Open Mail App
-                 
                </button>
 
                 {/* 4. Copy Text */}
