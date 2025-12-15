@@ -20,35 +20,36 @@ export default function TextRevealScrub({
 
     const el = elRef.current;
     let split = null;
-    let ctx = null; // GSAP Context ile temizlik yapacağız
-
-    // Mobilde sürekli resize tetiklenmesin diye genişlik kontrolü
+    let ctx = gsap.context(() => {}, elRef); // Boş context başlat
+    let resizeTimer = null;
     let lastWidth = window.innerWidth;
 
     const runSetup = () => {
-      // 1. Önce eski split varsa temizle
+      // 1. Önceki işlemleri temizle
       if (split) split.revert();
+      ctx.revert(); // Eski animasyonları öldür
 
-      // 2. Split işlemini yap
+      // 2. Yeni Split işlemi
       split = new SplitType(el, { 
         types: 'words, chars',
         tagName: 'span' 
       });
 
-      // 3. CSS düzeltmeleri (Mobilde satır kaymasını önler)
+      // 3. CSS Ayarları (Mobil performansı için inline-block önemli)
+      // DİKKAT: 'will-change' kaldırıldı, mobil çökmesini engeller.
       split.words.forEach((w) => {
         w.style.display = 'inline-block';
-        w.style.willChange = 'opacity, transform';
       });
 
-      // 4. GSAP Context içine alıyoruz (React Strict Mode ve Cleanup dostu)
-      ctx = gsap.context(() => {
+      // 4. GSAP Context içine al
+      ctx.add(() => {
         gsap.fromTo(
           split.words, 
           {
-            opacity: 0.25,
+            opacity: 0.25, // Başlangıç opaklığı
             y: 8,
-            color: "#999"
+            color: "#999",
+            willChange: 'transform, opacity' // Sadece animasyon sırasında GPU kullan (GSAP yönetir)
           },
           {
             opacity: 1,
@@ -56,44 +57,54 @@ export default function TextRevealScrub({
             color: "inherit",
             stagger: 0.1,
             ease: 'none',
+            // force3D: true, // Mobilde performansı artırır
             scrollTrigger: {
               trigger: el,
               start: start,
               end: end,
-              scrub: 1, // Mobilde biraz daha yumuşak olması için 1 iyidir
+              scrub: 0.5, // Mobilde çok düşük scrub (0.1 gibi) titreme yapabilir, 0.5 iyidir
             }
           }
         );
-      }, elRef);
+      });
     };
 
-    // --- KRİTİK NOKTA 1: FONT BEKLEME ---
-    // Font yüklenmeden split yapılırsa, font yüklenince yazı bozulur.
-    document.fonts.ready.then(() => {
-      runSetup();
-    });
-
-    // --- KRİTİK NOKTA 2: MOBİL RESIZE ÇÖZÜMÜ ---
-    const handleResize = () => {
-      // Sadece GENİŞLİK değiştiyse (telefon yan çevrildiyse) yeniden hesapla.
-      // Adres çubuğu inip kalktığında (height değiştiğinde) hesaplama yapma!
-      if (window.innerWidth !== lastWidth) {
-        lastWidth = window.innerWidth;
-        // Context'i temizle ve yeniden kur
-        if (ctx) ctx.revert();
+    // --- FONT YÜKLEME VE TIMEOUT GÜVENCESİ ---
+    // Font yüklenirse çalıştır, ama 1sn içinde yüklenmezse yine de çalıştır (Beyaz ekran kalmasın)
+    const init = () => {
+      document.fonts.ready.then(() => {
         runSetup();
-      } else {
-        // Genişlik değişmediyse sadece ScrollTrigger'ı tazele, split'i bozma.
-        ScrollTrigger.refresh();
-      }
+      }).catch(() => {
+        // Font hatası olursa yine de çalıştır
+        runSetup();
+      });
+    };
+
+    // 100ms gecikmeli başlat ki DOM tam otursun
+    const initialTimer = setTimeout(init, 100);
+
+    // --- MOBİL RESIZE OPTİMİZASYONU (DEBOUNCE) ---
+    const handleResize = () => {
+      // Sadece genişlik değişiminde çalış
+      if (window.innerWidth === lastWidth) return;
+      
+      lastWidth = window.innerWidth;
+
+      // İşlemi hemen yapma, kullanıcı boyutlandırmayı bitirene kadar bekle (200ms)
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        runSetup();
+      }, 200);
     };
 
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (ctx) ctx.revert(); // GSAP animasyonlarını temizle
-      if (split) split.revert(); // HTML'i eski haline getir
+      clearTimeout(resizeTimer);
+      clearTimeout(initialTimer);
+      if (ctx) ctx.revert();
+      if (split) split.revert();
     };
   }, [start, end]);
 
