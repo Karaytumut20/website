@@ -11,34 +11,48 @@ export default function NavigationLoader() {
   
   const pathname = usePathname(); 
   const router = useRouter();
-  
-  // Önceki path'i hatırlamak için (Gerçekten sayfa değişti mi?)
   const prevPathname = useRef(pathname);
 
-  // --- FAZ 1: ÇIKIŞ (Perde İner & Sayfa Değişir) ---
+  // Pulse animasyonunu tutmak için referans
+  const pulseAnimRef = useRef(null);
+
+  // --- FAZ 1: ÇIKIŞ (Perde İner & Bekleme Modu) ---
   useEffect(() => {
-    // Şartlar: İlk yükleme bitmiş, Geçiş başlamış, Hedef URL var ve Overlay hazır.
     if (!isFirstLoadCompleted || !isTransitioning || !targetUrl || !overlayRef.current) return;
+
+    // Kullanıcının başka bir yere tıklamasını engelle ve bekleme ikonu göster
+    document.body.style.cursor = "wait";
+    document.body.style.pointerEvents = "none";
 
     const tl = gsap.timeline({
         onComplete: () => {
-            // KRİTİK NOKTA: Perde tamamen kapandığında (siyah ekran) yönlendirmeyi yap.
-            // Kullanıcı bu sırada siyah ekran görür, bozuk sayfa görmez.
+            // 1. Yönlendirmeyi yap
             router.push(targetUrl);
+            
+            // 2. Logo için "Nefes Alma" (Pulse) animasyonunu başlat
+            // Bu, kullanıcı siyah ekranda beklerken sitenin donmadığını hissettirir.
+            if (textRef.current) {
+                pulseAnimRef.current = gsap.to(textRef.current, {
+                    opacity: 0.5,
+                    scale: 0.95,
+                    duration: 0.8,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: "sine.inOut"
+                });
+            }
         }
     });
 
-    // 1. Hazırlık (Görünür yap)
     gsap.set(overlayRef.current, { display: "flex", yPercent: -100 });
 
-    // 2. Animasyon (Yukarıdan aşağı kapat)
     tl.to(overlayRef.current, {
         yPercent: 0,
-        duration: 0.6, // Hızlı ve net kapanış
+        duration: 0.6,
         ease: 'power4.inOut'
     })
     .fromTo(textRef.current, 
-        { y: 20, opacity: 0 },
+        { y: 20, opacity: 0, scale: 1 }, // Scale resetlenmeli
         { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, 
         "-=0.2"
     );
@@ -48,31 +62,36 @@ export default function NavigationLoader() {
 
   // --- FAZ 2: GİRİŞ (Perde Kalkar) ---
   useEffect(() => {
-    // Sadece path gerçekten değiştiyse çalış
     if (pathname === prevPathname.current) return;
-
-    // Path değişti, demek ki Next.js yeni sayfayı yükledi.
     prevPathname.current = pathname;
     window.scrollTo(0, 0);
 
     if (!overlayRef.current) return;
 
+    // Pulse animasyonunu durdur (Eğer varsa)
+    if (pulseAnimRef.current) {
+        pulseAnimRef.current.kill();
+        pulseAnimRef.current = null;
+        // Opaklığı ve scale'i normale döndür
+        gsap.set(textRef.current, { opacity: 1, scale: 1 });
+    }
+
     const tl = gsap.timeline({
         onComplete: () => {
-            endTransition(); // Her şeyi sıfırla
+            endTransition(); 
             gsap.set(overlayRef.current, { display: "none" });
+            
+            // İmleci ve tıklamaları serbest bırak
+            document.body.style.cursor = "default";
+            document.body.style.pointerEvents = "auto";
         }
     });
 
-    // Yazıyı sil, Perdeyi kaldır (Aşağı doğru akıp gitsin veya yukarı çekilsin)
-    // "yPercent: 100" -> Aşağı doğru devam eder (Sinematik)
-    // "yPercent: -100" -> Geldiği gibi yukarı geri döner
-    
     tl.to(textRef.current, {
         y: -20,
         opacity: 0,
         duration: 0.3,
-        delay: 0.2 // Render için minik nefes payı
+        delay: 0.2 
     })
     .to(overlayRef.current, {
         yPercent: 100, 
@@ -80,9 +99,9 @@ export default function NavigationLoader() {
         ease: 'power4.inOut'
     });
 
-  }, [pathname, endTransition]); // Sadece pathname değişince tetiklenir
+  }, [pathname, endTransition]); 
 
-
+  // İlk yükleme bitmediyse render etme
   if (!isFirstLoadCompleted) return null;
 
   return (
