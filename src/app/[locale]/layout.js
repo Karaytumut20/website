@@ -8,8 +8,23 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Preloader from '@/components/animation/Preloader';
 import PageTransition from '@/components/layout/PageTransition'; 
-import NavigationLoader from '@/components/layout/NavigationLoader'; // YENİ EKLENDİ
+import NavigationLoader from '@/components/layout/NavigationLoader';
 import { TransitionProvider } from '@/context/TransitionContext'; 
+import localFont from 'next/font/local';
+
+// 1. BAŞLIKLAR İÇİN: Neue Montreal
+const neueMontreal = localFont({
+  src: '../../../src/app/fonts/NeueMontreal-Regular.otf',
+  variable: '--font-neue-montreal',
+  display: 'swap',
+});
+
+// 2. İÇ YAZILAR (GENEL) İÇİN: Apercu
+const apercu = localFont({
+  src: '../../../src/app/fonts/apercu_regular_pro.otf',
+  variable: '--font-apercu',
+  display: 'swap',
+});
 
 export default function LocaleLayout({ children, params: { locale } }) {
   useScroll(); 
@@ -19,22 +34,17 @@ export default function LocaleLayout({ children, params: { locale } }) {
   try { messages = require(`../../messages/${locale}.json`); } 
   catch (error) { messages = require(`../../messages/en.json`); }
 
-  // '/project/' URL'indeyiz ama '/projects' değilsek detay sayfasıdır.
   const isProjectDetailPage = pathname.includes('/project/') && !pathname.includes('/projects');
 
   return (
     <html lang={locale}>
-      <body className="antialiased bg-[#e3e3db] text-black">
+      {/* İki font değişkenini de buraya ekledik. Varsayılan sınıf 'font-sans' (Apercu) oldu. */}
+      <body className={`${neueMontreal.variable} ${apercu.variable} antialiased bg-[#e3e3db] text-black font-sans`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           
           <TransitionProvider>
-            {/* 1. İlk Açılış Preloader'ı (Sadece F5'te çalışır) */}
             <Preloader />
-            
-            {/* 2. İlk Açılış Geçişi (Preloader ile entegre) */}
             <PageTransition />
-            
-            {/* 3. Sayfalar Arası Geçiş Loader'ı (YENİ - Sadece navigasyonda çalışır) */}
             <NavigationLoader />
             
             <Header />
@@ -43,7 +53,6 @@ export default function LocaleLayout({ children, params: { locale } }) {
               {children}
             </main>
 
-            {/* Proje detay sayfalarında Global Footer GİZLENİR */}
             {!isProjectDetailPage && <Footer />}
 
           </TransitionProvider>

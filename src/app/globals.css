@@ -17,7 +17,14 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* font-family satırını sildik çünkü Tailwind config'deki 'font-sans' (Apercu) devreye girecek */
+}
+
+/* OTOMATİK BAŞLIK AYARI */
+/* Sitedeki tüm h1, h2, h3, h4, h5, h6 etiketleri otomatik olarak Neue Montreal olur */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-neue-montreal);
+  font-weight: normal; /* Fontun kendi kalınlığını kullanması için */
 }
 
 @layer utilities {
