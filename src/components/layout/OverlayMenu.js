@@ -1,8 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef } from 'react';
-// import Link from 'next/link';  <-- Bunu kaldırın
-import TransitionLink from '@/components/ui/TransitionLink'; // <-- Bunu ekleyin
+import TransitionLink from '@/components/ui/TransitionLink';
 import { gsap } from 'gsap';
 
 export default function OverlayMenu({ isOpen, onClose }) {
@@ -52,10 +51,10 @@ export default function OverlayMenu({ isOpen, onClose }) {
       <div className="flex flex-col justify-center flex-1 w-full h-full px-6 md:px-20">
         <div ref={contentRef} className="flex flex-col gap-2">
             {mainLinks.map((item) => (
-              <TransitionLink // <-- Link yerine TransitionLink kullanıldı
+              <TransitionLink 
                 key={item.id} 
                 href={item.path} 
-                onClick={onClose} // Menüyü kapatma fonksiyonu buraya taşındı
+                onClick={onClose} 
                 className="flex items-baseline gap-4 py-6 transition-colors border-b group md:gap-10 border-white/10 md:py-8 hover:border-white"
               >
                 <span className="font-mono text-xs transition-opacity md:text-sm opacity-40 group-hover:opacity-100">
@@ -68,8 +67,6 @@ export default function OverlayMenu({ isOpen, onClose }) {
             ))}
         </div>
       </div>
-      
-      {/* Footer kısmı aynı kalabilir çünkü dış linkler (a tag) normal çalışmalı */}
       <div className="flex items-end justify-between w-full px-6 py-10 border-t md:px-20 border-white/10">
          <div className="flex gap-6">
             {socialLinks.map((social, i) => (

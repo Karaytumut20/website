@@ -1,13 +1,12 @@
-'use client';
+﻿'use client';
 import { useEffect, useRef } from 'react';
-import Link from 'next/link';
+import TransitionLink from '@/components/ui/TransitionLink';
 import Image from 'next/image';
 import { gsap } from 'gsap';
 
 export default function ProjectGrid({ projects }) {
   const gridRef = useRef(null);
 
-  // Giriş Animasyonu (Kartlar sırayla belirir)
   useEffect(() => {
     if(!gridRef.current) return;
     gsap.fromTo(gridRef.current.children,
@@ -19,22 +18,18 @@ export default function ProjectGrid({ projects }) {
   return (
     <div ref={gridRef} className="grid grid-cols-1 pt-10 md:grid-cols-2 gap-x-10 gap-y-20">
       {projects.map((project) => (
-        <Link 
+        <TransitionLink 
           key={project.id} 
           href={`/project/${project.slug}`}
           className="block w-full cursor-pointer group"
         >
-          {/* --- Kart Görseli --- */}
           <div className="relative w-full aspect-[4/3] overflow-hidden rounded-2xl bg-gray-200 mb-6">
-             {/* Resim */}
              <Image 
                 src={project.cover} 
                 alt={project.title} 
                 fill 
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
              />
-             
-             {/* Hover Overlay & Button */}
              <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-500 opacity-0 bg-black/20 group-hover:opacity-100">
                 <div className="flex items-center justify-center w-24 h-24 transition-transform duration-500 delay-100 transform scale-0 bg-white rounded-full shadow-xl group-hover:scale-100">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-black">
@@ -46,8 +41,6 @@ export default function ProjectGrid({ projects }) {
                 </span>
              </div>
           </div>
-
-          {/* --- Kart Bilgileri --- */}
           <div className="flex flex-col gap-1">
             <h3 className="text-3xl font-medium tracking-tight text-[#1c1c1c] group-hover:underline decoration-1 underline-offset-4">
                 {project.title}
@@ -57,7 +50,7 @@ export default function ProjectGrid({ projects }) {
                 <span className="font-mono text-xs">{project.services ? project.services.split('/')[0] : "Design"}</span>
             </div>
           </div>
-        </Link>
+        </TransitionLink>
       ))}
     </div>
   );

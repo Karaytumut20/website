@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Preloader from '@/components/animation/Preloader';
 import PageTransition from '@/components/layout/PageTransition'; 
+import NavigationLoader from '@/components/layout/NavigationLoader'; // YENİ EKLENDİ
 import { TransitionProvider } from '@/context/TransitionContext'; 
 
 export default function LocaleLayout({ children, params: { locale } }) {
@@ -27,8 +28,15 @@ export default function LocaleLayout({ children, params: { locale } }) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           
           <TransitionProvider>
+            {/* 1. İlk Açılış Preloader'ı (Sadece F5'te çalışır) */}
             <Preloader />
+            
+            {/* 2. İlk Açılış Geçişi (Preloader ile entegre) */}
             <PageTransition />
+            
+            {/* 3. Sayfalar Arası Geçiş Loader'ı (YENİ - Sadece navigasyonda çalışır) */}
+            <NavigationLoader />
+            
             <Header />
             
             <main className="relative z-10 min-h-screen">
