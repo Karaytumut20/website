@@ -1,5 +1,6 @@
 'use client';
 import TextReveal from '@/components/animation/TextReveal';
+import TextRevealScrub from '@/components/TextRevealScrub';
 import Link from 'next/link';
 
 export default function AboutPage() {
@@ -24,7 +25,21 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-[#e3e3db] text-black font-sans pt-32 pb-10 px-6 md:px-10 flex flex-col">
-      
+       <div className="flex flex-col items-start justify-between mb-20 md:flex-row md:items-end">
+                   <div className="relative z-10">
+                       {/* Animasyonlu Başlık: Kelime kelime açılarak gelir */}
+                       <TextRevealScrub>
+                           <h1 className="text-[13vw] leading-[0.85] font-black tracking-tighter uppercase text-[#1c1c1c]">
+                               About
+                               <br />
+                               <span className="ml-[10vw] md:ml-[4vw] text-gray-400">me</span>
+                           </h1>
+                       </TextRevealScrub>
+                   </div>
+           
+                   {/* Proje Sayacı */}
+                  
+                 </div>
       {/* --- BÖLÜM 1: MANIFESTO --- */}
       <div className="w-full max-w-[95%] mx-auto mt-10 md:mt-20 flex flex-col gap-20 mb-32 md:mb-48">
         

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'; // useEffect eklendi
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import TextRevealScrub from '@/components/TextRevealScrub';
 
 export default function ContactPage() {
   const [activeTab, setActiveTab] = useState('book');
@@ -146,13 +147,21 @@ export default function ContactPage() {
     <div ref={containerRef} className="min-h-screen bg-[#e3e3db] text-black pt-32 px-4 md:px-10 pb-20 font-sans selection:bg-black selection:text-white">
       
       {/* BAŞLIK */}
-      <div className="mb-16 overflow-hidden">
-        <h1 className="text-[11vw] leading-[0.8] font-bold uppercase tracking-tighter overflow-hidden">
-          {(activeTab === 'book' ? 'Start Project' : 'Join The Team').split('').map((char, index) => (
-            <span key={index} className="inline-block hero-title-char">{char === ' ' ? '\u00A0' : char}</span>
-          ))}
-        </h1>
-      </div>
+      <div className="flex flex-col items-start justify-between mb-20 md:flex-row md:items-end">
+             <div className="relative z-10">
+                 {/* Animasyonlu Başlık: Kelime kelime açılarak gelir */}
+                 <TextRevealScrub>
+                     <h1 className="text-[13vw] leading-[0.85] font-black tracking-tighter uppercase text-[#1c1c1c]">
+                         Start
+                         <br />
+                         <span className="ml-[10vw] md:ml-[4vw] text-gray-400">Project</span>
+                     </h1>
+                 </TextRevealScrub>
+             </div>
+     
+             {/* Proje Sayacı */}
+            
+           </div>
 
       {/* TABLAR */}
       <div className="relative flex w-full">
