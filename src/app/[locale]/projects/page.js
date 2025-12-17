@@ -20,6 +20,9 @@ export default function ProjectsPage() {
   const cursorRef = useRef(null);
   const cursorTextRef = useRef(null);
   const [isHoveringProject, setIsHoveringProject] = useState(false);
+  
+  // Masaüstü kontrolü için state
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // --- DROPDOWN REFS ---
   const containerRef = useRef(null);
@@ -28,28 +31,51 @@ export default function ProjectsPage() {
   const arrowRef = useRef(null);
 
   // ---------------------------------------------------------
-  // 1. CUSTOM CURSOR MOUSE TAKİP (GSAP quickTo)
+  // 1. CUSTOM CURSOR MOUSE TAKİP (SADECE DESKTOP)
   // ---------------------------------------------------------
   useEffect(() => {
-    // Mouse takibi için xTo ve yTo kullanımı (En yüksek performans)
+    // Ekran genişliği kontrolü (1024px altı mobil/tablet kabul edilir)
+    const checkIsDesktop = () => {
+      if (window.innerWidth >= 1024) {
+        setIsDesktop(true);
+      } else {
+        setIsDesktop(false);
+      }
+    };
+
+    // İlk yüklemede kontrol et
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+
+    // Mouse takibi (GSAP quickTo)
     const xTo = gsap.quickTo(cursorRef.current, "x", { duration: 0.1, ease: "power3" });
     const yTo = gsap.quickTo(cursorRef.current, "y", { duration: 0.1, ease: "power3" });
 
     const moveCursor = (e) => {
-      xTo(e.clientX);
-      yTo(e.clientY);
+      // Sadece masaüstü modundaysak ve ref varsa çalış
+      if (window.innerWidth >= 1024 && cursorRef.current) {
+        xTo(e.clientX);
+        yTo(e.clientY);
+      }
     };
 
     window.addEventListener("mousemove", moveCursor);
-    return () => window.removeEventListener("mousemove", moveCursor);
+    
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener('resize', checkIsDesktop);
+    };
   }, []);
 
   // ---------------------------------------------------------
   // 2. CURSOR DURUM ANİMASYONU (Büyüme/Küçülme)
   // ---------------------------------------------------------
   useEffect(() => {
+    // Mobil veya tabletteysek animasyonu hiç çalıştırma
+    if (!isDesktop || !cursorRef.current) return;
+
     if (isHoveringProject) {
-      // Proje üzerindeyken: Büyü, Opak ol ve Yazıyı Göster
+      // Proje üzerindeyken: Büyü, Opak ol
       gsap.to(cursorRef.current, {
         scale: 1,
         opacity: 1,
@@ -65,11 +91,12 @@ export default function ProjectsPage() {
         ease: "power2.out"
       });
     }
-  }, [isHoveringProject]);
+  }, [isHoveringProject, isDesktop]);
 
-  // Çocuk bileşenlere (Grid/List) gönderilecek handler'lar
-  const handleProjectEnter = () => setIsHoveringProject(true);
-  const handleProjectLeave = () => setIsHoveringProject(false);
+  // Çocuk bileşenlere gönderilecek handler'lar
+  // Mobilde state değiştirmeyi engelleyerek gereksiz render'ı önleriz
+  const handleProjectEnter = () => { if(isDesktop) setIsHoveringProject(true); };
+  const handleProjectLeave = () => { if(isDesktop) setIsHoveringProject(false); };
 
   // ---------------------------------------------------------
   // 3. DROPDOWN AÇILIŞ / KAPANIŞ ANİMASYONU
@@ -79,12 +106,9 @@ export default function ProjectsPage() {
       const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
 
       if (isDropdownOpen) {
-        // AÇILMA SENARYOSU
-        
-        // Ok ikonunu döndür
+        // AÇILMA
         gsap.to(arrowRef.current, { rotation: 180, duration: 0.5 });
 
-        // Menü kutusunu aç (Siyah arka plan)
         tl.to(dropdownRef.current, {
           height: "auto",
           opacity: 1,
@@ -92,7 +116,6 @@ export default function ProjectsPage() {
           display: "block",
           transformOrigin: "top center"
         })
-        // Yazıları Maskeden Çıkar (Reveal Effect)
         .fromTo(".menu-text-inner", 
           { y: "100%" }, 
           { y: "0%", duration: 0.5, stagger: 0.05, ease: "power2.out" },
@@ -100,18 +123,14 @@ export default function ProjectsPage() {
         );
 
       } else {
-        // KAPANMA SENARYOSU
-        
-        // Ok ikonunu düzelt
+        // KAPANMA
         gsap.to(arrowRef.current, { rotation: 0, duration: 0.5 });
 
-        // Yazıları maskeye geri sok
         tl.to(".menu-text-inner", {
             y: "-100%",
             duration: 0.3,
             stagger: { amount: 0.1, from: "end" }
         })
-        // Kutuyu kapat
         .to(dropdownRef.current, {
           height: 0,
           opacity: 0,
@@ -124,7 +143,6 @@ export default function ProjectsPage() {
     return () => ctx.revert();
   }, [isDropdownOpen]);
 
-  // Kategori seçildiğinde oluşan anlık efekt
   const animateSelection = (target) => {
     gsap.fromTo(target, 
       { x: 10, color: "#ffffff" },
@@ -147,7 +165,6 @@ export default function ProjectsPage() {
   }, [selectedCategories]);
 
   const toggleCategory = (cat, e) => {
-    // Animasyonu tetikle
     const textElement = e.currentTarget.querySelector('.menu-text-inner');
     animateSelection(textElement);
 
@@ -171,13 +188,13 @@ export default function ProjectsPage() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#f3f2ed] text-[#1c1c1c] pt-40 px-6 md:px-12 pb-24 overflow-hidden" 
-         onClick={() => isDropdownOpen && setIsDropdownOpen(false)}>
+          onClick={() => isDropdownOpen && setIsDropdownOpen(false)}>
       
       {/* --- CUSTOM CURSOR ELEMENTİ --- */}
-      {/* mix-blend-difference: Arka plan ne renkse zıttı görünür (Siyah üstünde beyaz, beyaz üstünde siyah) */}
+      {/* 'hidden lg:flex' sınıfı ile sadece geniş ekranlarda (Desktop) görünür, mobilde gizlenir */}
       <div 
         ref={cursorRef}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center mix-blend-difference"
+        className="hidden lg:flex fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-difference"
         style={{ width: '100px', height: '100px', opacity: 0, transform: 'scale(0)' }} 
       >
         <div className="absolute inset-0 bg-white rounded-full opacity-100"></div>
@@ -190,7 +207,6 @@ export default function ProjectsPage() {
       <div className="flex flex-col items-start justify-between mb-20 md:flex-row md:items-end">
         <div className="relative z-10">
             <TextRevealScrub>
-                {/* GÜNCELLEME: font-heading eklendi */}
                 <h1 className="text-[13vw] leading-[0.85] font-heading font-black tracking-tighter uppercase text-[#1c1c1c]">
                         Projects
                 </h1>
@@ -207,7 +223,6 @@ export default function ProjectsPage() {
         {/* CUSTOM DROPDOWN (ANIMATED) */}
         <div className="relative w-72" onClick={(e) => e.stopPropagation()}>
             
-            {/* TRIGGER BUTTON */}
             <button 
                 ref={triggerRef}
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -223,7 +238,7 @@ export default function ProjectsPage() {
                 </svg>
             </button>
 
-            {/* DROPDOWN MENU (BLACK BOX) */}
+            {/* DROPDOWN MENU */}
             <div 
                 ref={dropdownRef}
                 className="absolute left-0 w-full mt-0 overflow-hidden bg-[#1c1c1c] text-[#f3f2ed] shadow-2xl h-0 opacity-0 hidden"
@@ -238,9 +253,7 @@ export default function ProjectsPage() {
                                 className="relative flex items-center justify-between px-6 py-3 overflow-hidden transition-colors cursor-pointer group hover:bg-white/5"
                             >
                                 <div className="relative flex items-center w-full h-6 gap-3 overflow-hidden">
-                                    {/* Nokta İndikatörü */}
                                     <span className={`w-1.5 h-1.5 rounded-full bg-[#f3f2ed] transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}></span>
-                                    {/* Animasyonlu Metin */}
                                     <span className={`menu-text-inner text-sm font-medium uppercase tracking-wider block transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>
                                         {cat}
                                     </span>
@@ -277,14 +290,14 @@ export default function ProjectsPage() {
         {view === 'grid' ? (
             <ProjectGrid 
                 projects={filteredProjects} 
-                onMouseEnter={handleProjectEnter} // Event iletiyoruz
-                onMouseLeave={handleProjectLeave} // Event iletiyoruz
+                onMouseEnter={handleProjectEnter} 
+                onMouseLeave={handleProjectLeave} 
             />
         ) : (
             <ProjectList 
                 projects={filteredProjects} 
-                onMouseEnter={handleProjectEnter} // Event iletiyoruz
-                onMouseLeave={handleProjectLeave} // Event iletiyoruz
+                onMouseEnter={handleProjectEnter} 
+                onMouseLeave={handleProjectLeave} 
             />
         )}
       </div>

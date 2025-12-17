@@ -127,7 +127,7 @@ export default function AboutPage() {
                             I am a creative developer operating at the intersection of <span className="font-serif italic">design</span>, <span className="font-serif italic">technology</span>, and <span className="font-serif italic">culture</span>.
                         </p>
                         <p className="max-w-2xl mt-8 text-lg leading-relaxed md:text-xl opacity-70">
-                            Since 2021, I have been deconstructing the ordinary to build distinct visual languages. I don't just design websites; I curate digital atmospheres that evoke emotion and drive connection. My approach is rooted in precision, fueled by curiosity, and executed with obsession.
+                            Since 2021, I have been deconstructing the ordinary to build distinct visual languages. I dont just design websites; I curate digital atmospheres that evoke emotion and drive connection. My approach is rooted in precision, fueled by curiosity, and executed with obsession.
                         </p>
                     </div>
                 </div>
