@@ -11,7 +11,7 @@ export default function OverlayMenu({ isOpen, onClose }) {
   const mainLinks = [
     { id: "01", label: "Home", path: "/" },
     { id: "02", label: "Work", path: "/projects" },
-    { id: "03", label: "Studio", path: "/about" },
+    { id: "03", label: "About", path: "/about" },
     { id: "04", label: "Contact", path: "/contact" }
   ];
 
