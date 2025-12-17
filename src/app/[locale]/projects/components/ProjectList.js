@@ -88,21 +88,31 @@ export default function ProjectList({ projects }) {
             onMouseLeave={handleMouseLeave}
           >
             <div className="project-roll-wrapper h-[300px] w-full relative">
+              
+              {/* 1. STATE (NORMAL) */}
               <div className="h-[100px] flex items-center justify-between px-2 md:px-4 bg-[#f3f2ed] text-black">
-                <span className="text-2xl font-bold tracking-tighter uppercase transition-opacity md:text-5xl opacity-40 group-hover:opacity-100">{project.title}</span>
+                {/* GÜNCELLEME: font-heading eklendi */}
+                <span className="text-2xl font-bold tracking-tighter uppercase transition-opacity font-heading md:text-5xl opacity-40 group-hover:opacity-100">{project.title}</span>
                 <span className="font-mono text-[10px] md:text-xs tracking-widest uppercase opacity-40">{project.category}</span>
               </div>
+
+              {/* 2. STATE (HOVER - ORTA) */}
               <div className="h-[100px] flex items-center justify-between px-4 md:px-6 bg-black text-white">
-                <span className="text-2xl font-bold tracking-tighter uppercase transition-transform md:text-5xl md:translate-x-4">{project.title}</span>
+                {/* GÜNCELLEME: font-heading eklendi */}
+                <span className="text-2xl font-bold tracking-tighter uppercase transition-transform font-heading md:text-5xl md:translate-x-4">{project.title}</span>
                 <div className="flex flex-col text-right">
                   <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-[#e3e3db]">{project.client}</span>
                   <span className="font-mono text-[10px] opacity-50">{project.year}</span>
                 </div>
               </div>
+
+              {/* 3. STATE (ALT) */}
               <div className="h-[100px] flex items-center justify-between px-2 md:px-4 bg-[#f3f2ed] text-black">
-                <span className="text-2xl font-bold tracking-tighter uppercase md:text-5xl opacity-40">{project.title}</span>
+                {/* GÜNCELLEME: font-heading eklendi */}
+                <span className="text-2xl font-bold tracking-tighter uppercase font-heading md:text-5xl opacity-40">{project.title}</span>
                 <span className="font-mono text-[10px] md:text-xs tracking-widest uppercase opacity-40">{project.category}</span>
               </div>
+
             </div>
           </TransitionLink>
         ))}

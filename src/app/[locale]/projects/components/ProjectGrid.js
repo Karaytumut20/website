@@ -29,7 +29,8 @@ export default function ProjectGrid({ projects, onMouseEnter, onMouseLeave }) {
             {/* Alt Bilgi */}
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="mb-1 text-xl font-bold tracking-tight uppercase">{project.title}</h3>
+                {/* GÜNCELLEME: font-heading eklendi, uppercase korundu */}
+                <h3 className="mb-1 text-xl font-bold tracking-tight uppercase font-heading">{project.title}</h3>
                 <p className="font-mono text-sm opacity-60">{project.category}</p>
               </div>
               {/* Dekoratif ok işareti */}

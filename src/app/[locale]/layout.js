@@ -12,14 +12,14 @@ import NavigationLoader from '@/components/layout/NavigationLoader';
 import { TransitionProvider } from '@/context/TransitionContext'; 
 import localFont from 'next/font/local';
 
-// 1. BAŞLIKLAR İÇİN: Neue Montreal
+// 1. KÜÇÜK YAZILAR (GÖVDE) İÇİN: Neue Montreal
 const neueMontreal = localFont({
   src: '../../../src/app/fonts/NeueMontreal-Regular.otf',
   variable: '--font-neue-montreal',
   display: 'swap',
 });
 
-// 2. İÇ YAZILAR (GENEL) İÇİN: Apercu
+// 2. BÜYÜK BAŞLIKLAR İÇİN: Apercu
 const apercu = localFont({
   src: '../../../src/app/fonts/apercu_regular_pro.otf',
   variable: '--font-apercu',
@@ -38,7 +38,9 @@ export default function LocaleLayout({ children, params: { locale } }) {
 
   return (
     <html lang={locale}>
-      {/* İki font değişkenini de buraya ekledik. Varsayılan sınıf 'font-sans' (Apercu) oldu. */}
+      {/* font-sans sınıfı Tailwind ayarımızla artık Neue Montreal'i işaret ediyor.
+         Böylece tüm site varsayılan olarak Neue Montreal (küçük yazı fontu) ile başlar.
+      */}
       <body className={`${neueMontreal.variable} ${apercu.variable} antialiased bg-[#e3e3db] text-black font-sans`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           

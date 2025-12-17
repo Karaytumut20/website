@@ -90,10 +90,9 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
   }, [nextProject, router, isTransitioning, shouldUpdateProgress, canAdvance]);
 
   // --- ORTAK STİLLER ---
-  // h-[100dvh]: Mobilde adres çubuğunu hesaba katan dinamik yükseklik.
-  // justify-center items-center: İçerideki h1'i tam ortaya kilitler.
   const containerClasses = "w-full h-[100dvh] flex flex-col justify-center items-center px-6 text-center relative overflow-hidden";
-  const titleClasses = "text-[10vw] font-medium uppercase leading-[0.85] tracking-tight text-black z-10 relative";
+  // H1 Başlıklar: Apercu (font-heading)
+  const titleClasses = "text-[10vw] font-heading font-medium uppercase leading-[0.85] tracking-tight text-black z-10 relative";
 
   return (
     <div className="relative min-h-screen bg-[#f3f2ed] text-[#1c1c1c] font-sans selection:bg-black selection:text-white">
@@ -113,17 +112,18 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
 
       {/* --- HERO SECTION --- */}
       <div className={`${containerClasses} z-10`}>
-        {/* BAŞLIK: Flex sayesinde tam ortada */}
+        {/* BAŞLIK: Apercu */}
         <h1 className={titleClasses}>
           {project.title}
         </h1>
 
-        {/* YARDIMCI İÇERİK: Absolute ile alta sabitlendi, başlığı itmez. */}
+        {/* YARDIMCI İÇERİK: Neue Montreal (font-sans) */}
         <div className="absolute left-0 z-10 flex flex-col items-center w-full gap-6 px-6 bottom-16 md:bottom-24">
             <p className="max-w-2xl text-xl leading-relaxed opacity-60">
             {project.description}
             </p>
-            <div className="flex gap-8 font-mono text-xs tracking-widest uppercase opacity-40">
+            {/* GÜNCELLEME: font-mono yerine font-sans (Neue Montreal) yapıldı */}
+            <div className="flex gap-8 font-sans text-xs tracking-widest uppercase opacity-40">
                 <span>{project.category}</span>
                 <span>—</span>
                 <span>{project.year}</span>
@@ -134,11 +134,11 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
       {/* --- MAIN IMAGE --- */}
       <div className="w-full h-[60vh] md:h-screen relative overflow-hidden bg-gray-200 z-0">
          <Image 
-            src={project.cover} 
-            alt={project.title} 
-            fill 
-            className="object-cover"
-            priority
+           src={project.cover} 
+           alt={project.title} 
+           fill 
+           className="object-cover"
+           priority
          />
       </div>
 
@@ -159,13 +159,13 @@ export default function ProjectDetail({ project, nextProject, prevProject }) {
       {/* --- NEXT PROJECT FOOTER --- */}
       <div ref={footerRef} className={`${containerClasses} z-[50] bg-[#f3f2ed]`}>
         
-        {/* YARDIMCI İÇERİK: Absolute ile üste sabitlendi, başlığı itmez. */}
-        {/* Mobilde başlığın üstüne binmemesi için top-32 veya %20 gibi bir değer verdik. */}
-        <span className="absolute top-[20%] md:top-32 mb-4 project-footer-copy opacity-60">
+        {/* GÜNCELLEME: "Next Project" yazısına font-heading (Apercu) eklendi. 
+            Eğer düz yazı olsun isterseniz 'font-heading' yerine 'font-sans' yapabilirsiniz. */}
+        <span className="absolute top-[20%] md:top-32 mb-4 project-footer-copy opacity-60 font-heading tracking-wide">
             Next Project
         </span>
         
-        {/* BAŞLIK: Flex sayesinde tam ortada (Hero ile birebir aynı konumda) */}
+        {/* BAŞLIK: Apercu */}
         <h1 className={titleClasses}>
             {nextProject.title}
         </h1>

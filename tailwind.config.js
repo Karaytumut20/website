@@ -12,11 +12,13 @@ module.exports = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        // 'sans': Tailwind'in varsayılan fontudur (body, p, div, span vs. bunu kullanır)
-        sans: ['var(--font-apercu)', 'sans-serif'],
+        // GÖVDE (Küçük Yazılar): Neue Montreal
+        // Tailwind'de 'font-sans' varsayılandır. Artık tüm site varsayılan olarak Neue Montreal kullanacak.
+        sans: ['var(--font-neue-montreal)', 'sans-serif'],
         
-        // 'heading': Başlıklar için kullanacağımız özel font ailesi
-        heading: ['var(--font-neue-montreal)', 'sans-serif'],
+        // BAŞLIK (Büyük Kısımlar): Apercu
+        // Büyük başlıklar için 'font-heading' sınıfını kullanacağız.
+        heading: ['var(--font-apercu)', 'sans-serif'],
       },
     },
   },

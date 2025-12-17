@@ -190,7 +190,8 @@ export default function ProjectsPage() {
       <div className="flex flex-col items-start justify-between mb-20 md:flex-row md:items-end">
         <div className="relative z-10">
             <TextRevealScrub>
-                <h1 className="text-[13vw] leading-[0.85] font-black tracking-tighter uppercase text-[#1c1c1c]">
+                {/* GÜNCELLEME: font-heading eklendi */}
+                <h1 className="text-[13vw] leading-[0.85] font-heading font-black tracking-tighter uppercase text-[#1c1c1c]">
                         Projects
                 </h1>
             </TextRevealScrub>
