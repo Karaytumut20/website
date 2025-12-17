@@ -1,12 +1,12 @@
 ﻿'use client';
 import { useEffect, useRef, useLayoutEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import TransitionLink from '@/components/ui/TransitionLink';
 import ProjectList from './projects/components/ProjectList';
 import { projects } from '@/lib/data';
 import TextRevealScrub from '@/components/TextRevealScrub';
+import ProjectGrid from './projects/components/ProjectGrid';
 
 if (typeof window !== 'undefined') { gsap.registerPlugin(ScrollTrigger); }
 
@@ -14,43 +14,55 @@ if (typeof window !== 'undefined') { gsap.registerPlugin(ScrollTrigger); }
 const services = [
   { id: '01', title: 'Art Direction', desc: 'Visual storytelling and brand aesthetics.' },
   { id: '02', title: 'Web Design', desc: 'User-centric interfaces with modern UX.' },
-  { id: '03', title: 'Development', desc: 'Creative coding, React & Next.js solutions.' },
-  { id: '04', title: '3D Motion', desc: 'Interactive WebGL and fluid animations.' },
+  { id: '03', title: 'Creative Dev', desc: 'React, Next.js & Creative Coding.' },
+  { id: '04', title: '3D & Motion', desc: 'Interactive WebGL and fluid animations.' },
 ];
 
 export default function Home() {
-  // const t = useTranslations('Hero');
   const mainRef = useRef(null);
   const heroRef = useRef(null);
-  const videoContainerRef = useRef(null);
-  // const videoRef = useRef(null); // Doğrudan video elementine animasyon vermediğimiz için buna gerek kalmadı
-  const textRef = useRef(null);
+  const heroTextContainerRef = useRef(null);
   const servicesRef = useRef(null);
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. HERO ANIMATION
-      const tlHero = gsap.timeline({
+      
+      // --- 1. HERO GİRİŞ ANİMASYONU (LOAD) ---
+      const tlLoad = gsap.timeline({ delay: 0.2 });
+
+      tlLoad.fromTo('.hero-line-inner',
+        { y: '110%', skewY: 10 },
+        { 
+          y: '0%', 
+          skewY: 0,
+          duration: 1.5, 
+          stagger: 0.15, 
+          ease: 'power4.out' 
+        }
+      )
+      .fromTo('.hero-sub', 
+        { opacity: 0, y: 20 }, 
+        { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }, 
+        "-=0.5"
+      );
+
+      // --- 2. HERO SCROLL ANİMASYONU (PARALLAX) ---
+      gsap.to(heroTextContainerRef.current, {
+        yPercent: 50,
+        opacity: 0,
+        scale: 0.95,
+        ease: 'none',
         scrollTrigger: {
           trigger: heroRef.current,
           start: 'top top',
-          end: '+=100%',
-          pin: true,
-          scrub: 1,
-        },
+          end: 'bottom top',
+          scrub: true,
+        }
       });
-      
-      // Animasyon container'a uygulandığı için içeride hangi videonun oynadığı fark etmez, ikisi de animasyona dahil olur.
-      tlHero.fromTo(videoContainerRef.current,
-        { clipPath: 'inset(10% 20% 10% 20% round 10px)', scale: 0.95 },
-        { clipPath: 'inset(0% 0% 0% 0% round 0px)', scale: 1, duration: 1, ease: 'power2.inOut' }
-      ).to(textRef.current,
-        { scale: 1.2, y: -50, opacity: 0, duration: 0.5, ease: 'power1.in' }, '<'
-      );
 
-      // 2. SERVICES LIST ANIMATION
+      // --- 3. SERVICES LIST ANIMATION ---
       const serviceItems = servicesRef.current.querySelectorAll('.service-item');
       gsap.fromTo(serviceItems, 
         { y: 50, opacity: 0 },
@@ -73,61 +85,79 @@ export default function Home() {
   }, []);
 
   return (
-    <div ref={mainRef} className="text-black bg-white">
+    <div ref={mainRef} className="text-black bg-white selection:bg-black selection:text-white">
       
       {/* --- HERO SECTION --- */}
-      <div ref={heroRef} className="relative flex flex-col items-center justify-center w-full h-screen overflow-hidden bg-white">
+      <div ref={heroRef} className="relative flex flex-col justify-end w-full min-h-screen px-4 pb-20 overflow-hidden bg-[#e3e3db] md:px-10 md:pb-32">
         
-        <div ref={textRef} className="absolute z-20 px-4 text-center text-white pointer-events-none mix-blend-difference">
-           {/* Hero Metni Buraya Gelebilir */}
+        {/* Arka plan dekoratif grid çizgileri */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-5">
+           <div className="w-full h-full" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '100px 100px' }}></div>
         </div>
 
-        <div ref={videoContainerRef} className="relative z-10 w-full h-full">
-          
-          {/* 1. DESKTOP VIDEO (md ve üzeri ekranlarda görünür) */}
-          <video 
-            className="absolute top-0 left-0 hidden object-cover w-full h-full md:block" 
-            autoPlay 
-            muted 
-            loop 
-            playsInline 
-            poster="/assets/img1.jpg"
-          >
-            <source src="/assets/Real (1).mp4" type="video/mp4" />
-          </video>
+        {/* Hero İçerik Kutusu */}
+        <div ref={heroTextContainerRef} className="relative z-10 flex flex-col w-full">
+            
+            {/* Üst Kısımdaki Ufak Yazılar Tamamen Kaldırıldı */}
 
-          {/* 2. MOBILE VIDEO (sadece md altı ekranlarda görünür) */}
-          {/* DİKKAT: '/assets/hero-video-mobile.mp4' dosyasını projene eklemeyi unutma */}
-          <video 
-            className="absolute top-0 left-0 block object-cover w-full h-full md:hidden" 
-            autoPlay 
-            muted 
-            loop 
-            playsInline 
-            poster="/assets/img1-mobile.jpg" // İstersen mobile özel poster de koyabilirsin
-          >
-            <source src="/assets/Real (3).mp4" type="video/mp4" />
-          </video>
+            {/* DEVASA BAŞLIK (Maskeleme Efektli) */}
+            <div className="flex flex-col font-black leading-[0.8] tracking-tighter text-[#1c1c1c] uppercase text-[17vw] mix-blend-multiply">
+                
+                {/* 1. Satır: CREATIVE */}
+                <div className="overflow-hidden">
+                    <span className="block hero-line-inner">Creative</span>
+                </div>
+                
+                {/* 2. Satır: DEVELOPER */}
+                <div className="overflow-hidden">
+                    <span className="block font-serif italic hero-line-inner text-black/80">
+                        Developer
+                    </span>
+                </div>
 
-          <div className="absolute inset-0 bg-black/20"></div>
+                {/* 3. Satır: & DESIGNER */}
+                <div className="overflow-hidden">
+                    <span className="block text-right md:text-left hero-line-inner">
+                        & Designer
+                    </span>
+                </div>
+
+            </div>
+
+            {/* Alt Açıklama */}
+            <div className="mt-12 md:mt-16 md:w-1/3 hero-sub">
+                <p className="text-lg leading-relaxed md:text-xl">
+                    I help brands and agencies build immersive digital experiences. 
+                    Focusing on interaction, motion, and clean code.
+                </p>
+            </div>
+
         </div>
+
+        {/* Scroll İndikatörü */}
+        <div className="absolute opacity-50 bottom-8 right-4 md:right-10 animate-bounce hero-sub">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+            </svg>
+        </div>
+
       </div>
 
       {/* --- INTRO & SERVICES (DARK SECTION) --- */}
-      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 md:py-40 px-6 md:px-10 min-h-screen flex flex-col justify-between rounded-t-3xl -mt-10">
+      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 md:py-40 px-6 md:px-10 min-h-screen flex flex-col justify-between rounded-t-3xl -mt-10 border-t border-white/10 shadow-2xl">
         
         {/* Mission Statement */}
         <div className="grid grid-cols-1 mb-32 md:grid-cols-12 gap-y-10 md:gap-x-10">
            <div className="col-span-1 md:col-span-4">
               <span className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase text-white/40">
                 <span className="w-2 h-2 bg-white rounded-full"></span>
-                Who We Are
+                Who I Am
               </span>
            </div>
            <div className="col-span-1 md:col-span-8">
               <TextRevealScrub staggerEach={0.16} start="top 85%" end="bottom 15%">
                 <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.15] tracking-tight text-white">
-                  We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
+                  I craft identities and experiences for the bold. Blurring the lines between reality and fiction through code and design.
                 </h2>
               </TextRevealScrub>
            </div>
@@ -137,7 +167,7 @@ export default function Home() {
         <div ref={servicesRef} className="grid grid-cols-1 pt-20 border-t md:grid-cols-12 gap-y-10 md:gap-x-10 border-white/10">
             <div className="col-span-1 md:col-span-4">
                 <span className="block mb-6 font-mono text-xs tracking-widest uppercase text-white/40">
-                    Our Capabilities
+                    My Expertise
                 </span>
                 <p className="max-w-xs text-sm leading-relaxed text-white/60">
                     Combining strategy, design, and technology to build brands that matter in culture.
@@ -164,7 +194,7 @@ export default function Home() {
       </div>
 
       {/* --- SELECTED WORKS SECTION --- */}
-      <div className="relative z-30 bg-[#f3f2ed] pt-32 pb-32 rounded-t-3xl -mt-10">
+      <div className="relative z-30 bg-[#f3f2ed] pt-32 pb-32 rounded-t-3xl -mt-10 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
         <div className="flex items-end justify-between px-6 mb-16 md:px-10">
           <span className="font-mono text-xs tracking-widest text-black uppercase opacity-40">
               Selected Works
@@ -174,7 +204,7 @@ export default function Home() {
           </span>
         </div>
         
-        <ProjectList projects={projects.slice(0, 4)} />
+        <ProjectGrid projects={projects.slice(0, 4)} />
         
         <div className="flex justify-center mt-24">
           <TransitionLink href="/projects">

@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import TextRevealScrub from '@/components/TextRevealScrub'; // Mevcut bileşeniniz
+import TextRevealScrub from '@/components/TextRevealScrub';
 import Link from 'next/link';
 
 // GSAP Plugin Kaydı
@@ -13,10 +13,10 @@ gsap.registerPlugin(ScrollTrigger);
 export default function AboutPage() {
   const containerRef = useRef(null);
 
-  // --- İÇERİK VERİLERİ (Premium Placeholder) ---
+  // --- İÇERİK VERİLERİ (Kişisel) ---
   const services = [
-    "Art Direction", "Brand Identity", "Web Design & Development", 
-    "Creative Strategy", "Motion & 3D", "Editorial Design"
+    "Art Direction", "Brand Identity", "Web Design", 
+    "Creative Development", "Motion & 3D", "Interaction Design"
   ];
 
   const clients = [
@@ -31,11 +31,11 @@ export default function AboutPage() {
     { name: "Cannes Lions Bronze", year: "2022" }
   ];
 
-  // --- GSAP ANİMASYONLARI ---
+  // --- GSAP ANİMASYONLARI (Aynı kaldı) ---
   useGSAP(() => {
     const tl = gsap.timeline();
 
-    // 1. Grid Çizgilerinin Çizilmesi (Scroll ile tetiklenir)
+    // 1. Grid Çizgileri
     const borders = gsap.utils.toArray('.anim-border');
     borders.forEach(border => {
         gsap.fromTo(border, 
@@ -96,7 +96,7 @@ export default function AboutPage() {
              <div className="relative z-10 w-full">
                  <TextRevealScrub>
                      <h1 className="text-[14vw] leading-[0.8] font-black tracking-tighter uppercase text-[#1c1c1c]">
-                         About
+                         About Me
                      </h1>
                  </TextRevealScrub>
                  
@@ -110,25 +110,24 @@ export default function AboutPage() {
         </div>
 
         {/* --- ANA GRID (BENTO BOX LAYOUT) --- */}
-        {/* CSS Grid yapısı: Mobilde 1 kolon, Tablette 2, Masaüstünde 12 kolonluk esnek yapı */}
         <div className="relative w-full border-t border-black/10">
             {/* Üst Çizgi Animasyonu */}
             <div className="absolute top-0 left-0 w-full h-px origin-left bg-black anim-border"></div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12">
 
-                {/* 1. KUTU: MANİFESTO (Büyük Alan) */}
+                {/* 1. KUTU: KİŞİSEL MANİFESTO (Büyük Alan) */}
                 <div className="relative p-6 py-12 border-b md:p-12 lg:col-span-8 md:border-r border-black/10 group">
                     <div className="absolute bottom-0 left-0 w-full h-px origin-left bg-black anim-border"></div>
                     <div className="absolute top-0 right-0 hidden w-px h-full origin-top bg-black anim-border-v md:block"></div>
 
-                    <h3 className="mb-8 text-xs font-bold tracking-widest uppercase opacity-40 anim-content">The Vision</h3>
+                    <h3 className="mb-8 text-xs font-bold tracking-widest uppercase opacity-40 anim-content">My Vision</h3>
                     <div className="anim-content">
                         <p className="text-2xl md:text-4xl lg:text-[2.5vw] font-medium leading-[1.15] tracking-tight">
-                            We are a creative studio operating at the intersection of <span className="font-serif italic">design</span>, <span className="font-serif italic">technology</span>, and <span className="font-serif italic">culture</span>.
+                            I am a creative developer operating at the intersection of <span className="font-serif italic">design</span>, <span className="font-serif italic">technology</span>, and <span className="font-serif italic">culture</span>.
                         </p>
                         <p className="max-w-2xl mt-8 text-lg leading-relaxed md:text-xl opacity-70">
-                            Since 2021, we have been deconstructing the ordinary to build distinct visual languages. We dont just design websites; we curate digital atmospheres that evoke emotion and drive connection. Our approach is rooted in precision, fueled by curiosity, and executed with obsession.
+                            Since 2021, I have been deconstructing the ordinary to build distinct visual languages. I don't just design websites; I curate digital atmospheres that evoke emotion and drive connection. My approach is rooted in precision, fueled by curiosity, and executed with obsession.
                         </p>
                     </div>
                 </div>
@@ -138,7 +137,7 @@ export default function AboutPage() {
                      <div className="absolute bottom-0 left-0 w-full h-px origin-left bg-black anim-border"></div>
                      
                      <div className="anim-content">
-                        <h3 className="mb-4 text-xs font-bold tracking-widest uppercase opacity-40">Established</h3>
+                        <h3 className="mb-4 text-xs font-bold tracking-widest uppercase opacity-40">Freelancing Since</h3>
                         <p className="text-6xl font-black tracking-tighter">2021</p>
                      </div>
                      
@@ -153,7 +152,7 @@ export default function AboutPage() {
                     <div className="absolute bottom-0 left-0 w-full h-px origin-left bg-black anim-border"></div>
                     <div className="absolute top-0 right-0 hidden w-px h-full origin-top bg-black anim-border-v lg:block"></div>
 
-                    <h3 className="mb-8 text-xs font-bold tracking-widest uppercase opacity-40 anim-content">Expertise</h3>
+                    <h3 className="mb-8 text-xs font-bold tracking-widest uppercase opacity-40 anim-content">My Expertise</h3>
                     <ul className="flex flex-col gap-3 anim-content">
                         {services.map((service, i) => (
                             <li key={i} className="text-lg font-medium transition-all duration-300 border-b border-transparent cursor-default md:text-xl hover:border-black hover:pl-2 w-max">
@@ -198,7 +197,7 @@ export default function AboutPage() {
         {/* --- ALT BÖLÜM: CTA (DEVASA) --- */}
         <div className="flex flex-col items-center w-full mt-32 text-center">
             <p className="mb-6 text-xs font-bold tracking-widest uppercase opacity-40 anim-content">
-                Ready to start?
+                Ready to collaborate?
             </p>
             
             <Link href="/contact" className="relative inline-block group">
@@ -213,7 +212,7 @@ export default function AboutPage() {
         {/* --- FOOTER BİLGİSİ --- */}
         <div className="flex items-end justify-between pt-6 mt-32 border-t border-black/10 anim-content">
             <span className="font-mono text-[10px] uppercase tracking-widest opacity-40">
-                La Crapule Studio © 2025
+                Umut Karaytu © 2025
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest opacity-40">
                 All Rights Reserved
