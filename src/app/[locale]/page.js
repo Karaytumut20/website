@@ -88,7 +88,7 @@ export default function Home() {
     <div ref={mainRef} className="text-black bg-white selection:bg-black selection:text-white">
       
       {/* --- HERO SECTION --- */}
-      <div ref={heroRef} className="relative flex flex-col justify-end w-full min-h-screen px-4 pb-20 overflow-hidden bg-[#e3e3db] md:px-10 md:pb-32">
+      <div ref={heroRef} className="relative flex flex-col justify-center md:justify-end w-full min-h-[85svh] md:min-h-screen px-4 md:pb-32 overflow-hidden bg-[#e3e3db] md:px-10">
         
         {/* Arka plan dekoratif grid çizgileri */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-5">
@@ -98,10 +98,8 @@ export default function Home() {
         {/* Hero İçerik Kutusu */}
         <div ref={heroTextContainerRef} className="relative z-10 flex flex-col w-full">
             
-            {/* Üst Kısımdaki Ufak Yazılar Tamamen Kaldırıldı */}
-
             {/* DEVASA BAŞLIK (Maskeleme Efektli) */}
-            <div className="flex flex-col font-black leading-[0.8] tracking-tighter text-[#1c1c1c] uppercase text-[17vw] mix-blend-multiply">
+            <div className="flex flex-col font-black leading-[0.8] tracking-tighter text-[#1c1c1c] uppercase text-[13vw] md:text-[15vw] mix-blend-multiply">
                 
                 {/* 1. Satır: CREATIVE */}
                 <div className="overflow-hidden">
@@ -125,8 +123,8 @@ export default function Home() {
             </div>
 
             {/* Alt Açıklama */}
-            <div className="mt-12 md:mt-16 md:w-1/3 hero-sub">
-                <p className="text-lg leading-relaxed md:text-xl">
+            <div className="mt-8 md:mt-16 md:w-1/3 hero-sub">
+                <p className="text-base leading-relaxed md:text-xl">
                     I help brands and agencies build immersive digital experiences. 
                     Focusing on interaction, motion, and clean code.
                 </p>
@@ -135,7 +133,8 @@ export default function Home() {
         </div>
 
         {/* Scroll İndikatörü */}
-        <div className="absolute opacity-50 bottom-8 right-4 md:right-10 animate-bounce hero-sub">
+        {/* GÜNCELLEME: bottom-6 -> bottom-24 (Mobil), md:bottom-10 -> md:bottom-32 (Masaüstü) */}
+        <div className="absolute opacity-50 bottom-24 right-4 md:bottom-32 md:right-10 animate-bounce hero-sub">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
             </svg>
@@ -144,10 +143,10 @@ export default function Home() {
       </div>
 
       {/* --- INTRO & SERVICES (DARK SECTION) --- */}
-      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 md:py-40 px-6 md:px-10 min-h-screen flex flex-col justify-between rounded-t-3xl -mt-10 border-t border-white/10 shadow-2xl">
+      <div className="relative z-30 bg-[#0a0a0a] text-white py-24 md:py-40 px-6 md:px-10 min-h-screen flex flex-col justify-between rounded-t-3xl -mt-10 border-t border-white/10 shadow-2xl">
         
         {/* Mission Statement */}
-        <div className="grid grid-cols-1 mb-32 md:grid-cols-12 gap-y-10 md:gap-x-10">
+        <div className="grid grid-cols-1 mb-24 md:mb-32 md:grid-cols-12 gap-y-10 md:gap-x-10">
            <div className="col-span-1 md:col-span-4">
               <span className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase text-white/40">
                 <span className="w-2 h-2 bg-white rounded-full"></span>
@@ -164,7 +163,7 @@ export default function Home() {
         </div>
 
         {/* Services List */}
-        <div ref={servicesRef} className="grid grid-cols-1 pt-20 border-t md:grid-cols-12 gap-y-10 md:gap-x-10 border-white/10">
+        <div ref={servicesRef} className="grid grid-cols-1 pt-16 border-t md:pt-20 md:grid-cols-12 gap-y-10 md:gap-x-10 border-white/10">
             <div className="col-span-1 md:col-span-4">
                 <span className="block mb-6 font-mono text-xs tracking-widest uppercase text-white/40">
                     My Expertise
@@ -194,8 +193,8 @@ export default function Home() {
       </div>
 
       {/* --- SELECTED WORKS SECTION --- */}
-      <div className="relative z-30 bg-[#f3f2ed] pt-32 pb-32 rounded-t-3xl -mt-10 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
-        <div className="flex items-end justify-between px-6 mb-16 md:px-10">
+      <div className="relative z-30 bg-[#f3f2ed] pt-24 pb-24 md:pt-32 md:pb-32 rounded-t-3xl -mt-10 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+        <div className="flex items-end justify-between px-6 mb-12 md:mb-16 md:px-10">
           <span className="font-mono text-xs tracking-widest text-black uppercase opacity-40">
               Selected Works
           </span>
@@ -206,7 +205,7 @@ export default function Home() {
         
         <ProjectGrid projects={projects.slice(0, 4)} />
         
-        <div className="flex justify-center mt-24">
+        <div className="flex justify-center mt-20 md:mt-24">
           <TransitionLink href="/projects">
             <button className="relative px-8 py-4 overflow-hidden transition-colors duration-300 bg-transparent border rounded-full group border-black/10 hover:border-black">
                 <div className="absolute inset-0 w-full h-full bg-black scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left ease-[cubic-bezier(0.22,1,0.36,1)]"></div>
