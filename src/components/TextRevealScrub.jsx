@@ -31,7 +31,7 @@ export default function TextRevealScrub({
 
       // 2. Yeni Split işlemi
       split = new SplitType(el, { 
-        types: 'words, chars',
+        types: 'words, chars, lines',
         tagName: 'span' 
       });
 

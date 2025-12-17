@@ -54,6 +54,15 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
       </div>
+      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 px-6 md:px-10 min-h-[80vh] flex flex-col justify-center">
+        <div className="max-w-[90%] mx-auto mb-24">
+          <TextRevealScrub staggerEach={0.16} start="top 85%" end="bottom 15%">
+            <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
+              We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
+            </h2>
+          </TextRevealScrub>
+        </div>
+      </div>
       <div className="relative z-30 bg-[#f3f2ed] pt-20 pb-20">
         <div className="px-6 mb-10 md:px-10">
           <span className="font-mono text-xs tracking-widest uppercase opacity-40">Selected Works</span>
@@ -67,15 +76,7 @@ export default function Home() {
           </TransitionLink>
         </div>
       </div>
-      <div className="relative z-30 bg-[#0a0a0a] text-white py-32 px-6 md:px-10 min-h-[80vh] flex flex-col justify-center">
-        <div className="max-w-[90%] mx-auto mb-24">
-          <TextRevealScrub staggerEach={0.16} start="top 85%" end="bottom 15%">
-            <h2 className="text-3xl md:text-5xl lg:text-[3.5vw] font-light leading-[1.2] tracking-tight text-gray-200">
-              We craft identities and experiences for the bold. Blurring the lines between reality and fiction.
-            </h2>
-          </TextRevealScrub>
-        </div>
-      </div>
+      
     </div>
   );
 }
