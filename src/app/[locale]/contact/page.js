@@ -114,7 +114,7 @@ export default function ContactPage() {
         {/* SOL KOLON */}
         <div className="md:col-span-4 info-section">
            <p className="text-xl font-medium leading-relaxed opacity-70">
-             Have an idea in mind? Let’s create something distinctive together. Fill out the form, and let's start the conversation.
+             Have an idea in mind? Let’s create something distinctive together. Fill out the form, and lets start the conversation.
            </p>
            
            <div className="flex flex-col gap-2 mt-16">
@@ -157,7 +157,7 @@ export default function ContactPage() {
                 className="inline-block bg-transparent border-b-2 border-black/20 focus:border-black outline-none w-full md:w-auto md:min-w-[240px] px-2 text-[#1c1c1c] placeholder:text-black/20 transition-colors"
             />
             
-            <span className="opacity-40">. I'd like to discuss a </span>
+            <span className="opacity-40">. Id like to discuss a </span>
             
             <input 
                 name="project" 

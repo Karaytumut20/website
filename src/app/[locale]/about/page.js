@@ -128,7 +128,7 @@ export default function AboutPage() {
                             We are a creative studio operating at the intersection of <span className="font-serif italic">design</span>, <span className="font-serif italic">technology</span>, and <span className="font-serif italic">culture</span>.
                         </p>
                         <p className="max-w-2xl mt-8 text-lg leading-relaxed md:text-xl opacity-70">
-                            Since 2021, we have been deconstructing the ordinary to build distinct visual languages. We don't just design websites; we curate digital atmospheres that evoke emotion and drive connection. Our approach is rooted in precision, fueled by curiosity, and executed with obsession.
+                            Since 2021, we have been deconstructing the ordinary to build distinct visual languages. We dont just design websites; we curate digital atmospheres that evoke emotion and drive connection. Our approach is rooted in precision, fueled by curiosity, and executed with obsession.
                         </p>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export default function AboutPage() {
             
             <Link href="/contact" className="relative inline-block group">
                 <h2 className="text-[10vw] leading-[0.8] font-black tracking-tighter uppercase text-[#1c1c1c] transition-colors duration-500 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-black group-hover:to-gray-500">
-                    Let's Create <br/> The Future.
+                    Lets Create <br/> The Future.
                 </h2>
                 {/* Alt Çizgi Animasyonu */}
                 <div className="absolute bottom-2 left-0 w-full h-[0.5vw] bg-[#1c1c1c] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-center"></div>

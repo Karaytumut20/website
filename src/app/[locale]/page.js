@@ -196,7 +196,7 @@ export default function Home() {
               </span>
               <TransitionLink href="/contact" className="group">
                   <h2 className="text-[10vw] font-black uppercase tracking-tighter leading-none text-black transition-colors duration-500 group-hover:text-gray-400">
-                      Let's Talk
+                      Lets Talk
                   </h2>
                   <div className="w-full h-1 mt-2 transition-transform duration-500 origin-center scale-x-0 bg-black group-hover:scale-x-100"></div>
               </TransitionLink>
