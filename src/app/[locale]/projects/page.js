@@ -30,32 +30,32 @@ export default function ProjectsPage() {
   const triggerRef = useRef(null);
   const arrowRef = useRef(null);
 
+  // İmleç Boyutu
+  const CURSOR_SIZE = 100;
+
   // ---------------------------------------------------------
-  // 1. CUSTOM CURSOR MOUSE TAKİP (SADECE DESKTOP)
+  // 1. CUSTOM CURSOR MOUSE TAKİP
   // ---------------------------------------------------------
   useEffect(() => {
-    // Ekran genişliği kontrolü (1024px altı mobil/tablet kabul edilir)
     const checkIsDesktop = () => {
-      if (window.innerWidth >= 1024) {
-        setIsDesktop(true);
-      } else {
-        setIsDesktop(false);
-      }
+      setIsDesktop(window.innerWidth >= 1024);
     };
 
-    // İlk yüklemede kontrol et
     checkIsDesktop();
     window.addEventListener('resize', checkIsDesktop);
 
-    // Mouse takibi (GSAP quickTo)
-    const xTo = gsap.quickTo(cursorRef.current, "x", { duration: 0.1, ease: "power3" });
-    const yTo = gsap.quickTo(cursorRef.current, "y", { duration: 0.1, ease: "power3" });
+    let xTo, yTo;
+
+    if (cursorRef.current) {
+       gsap.set(cursorRef.current, { xPercent: 0, yPercent: 0 });
+       xTo = gsap.quickTo(cursorRef.current, "x", { duration: 0.1, ease: "power3" });
+       yTo = gsap.quickTo(cursorRef.current, "y", { duration: 0.1, ease: "power3" });
+    }
 
     const moveCursor = (e) => {
-      // Sadece masaüstü modundaysak ve ref varsa çalış
-      if (window.innerWidth >= 1024 && cursorRef.current) {
-        xTo(e.clientX);
-        yTo(e.clientY);
+      if (window.innerWidth >= 1024 && cursorRef.current && xTo && yTo) {
+        xTo(e.clientX - CURSOR_SIZE / 2);
+        yTo(e.clientY - CURSOR_SIZE / 2);
       }
     };
 
@@ -68,47 +68,30 @@ export default function ProjectsPage() {
   }, []);
 
   // ---------------------------------------------------------
-  // 2. CURSOR DURUM ANİMASYONU (Büyüme/Küçülme)
+  // 2. CURSOR DURUM ANİMASYONU
   // ---------------------------------------------------------
   useEffect(() => {
-    // Mobil veya tabletteysek animasyonu hiç çalıştırma
     if (!isDesktop || !cursorRef.current) return;
 
     if (isHoveringProject) {
-      // Proje üzerindeyken: Büyü, Opak ol
-      gsap.to(cursorRef.current, {
-        scale: 1,
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
+      gsap.to(cursorRef.current, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" });
     } else {
-      // Normaldeyken: Küçül ve Kaybol
-      gsap.to(cursorRef.current, {
-        scale: 0,
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.out"
-      });
+      gsap.to(cursorRef.current, { scale: 0, opacity: 0, duration: 0.3, ease: "power2.out" });
     }
   }, [isHoveringProject, isDesktop]);
 
-  // Çocuk bileşenlere gönderilecek handler'lar
-  // Mobilde state değiştirmeyi engelleyerek gereksiz render'ı önleriz
   const handleProjectEnter = () => { if(isDesktop) setIsHoveringProject(true); };
   const handleProjectLeave = () => { if(isDesktop) setIsHoveringProject(false); };
 
   // ---------------------------------------------------------
-  // 3. DROPDOWN AÇILIŞ / KAPANIŞ ANİMASYONU
+  // 3. DROPDOWN ANİMASYONU
   // ---------------------------------------------------------
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power4.inOut" } });
 
       if (isDropdownOpen) {
-        // AÇILMA
         gsap.to(arrowRef.current, { rotation: 180, duration: 0.5 });
-
         tl.to(dropdownRef.current, {
           height: "auto",
           opacity: 1,
@@ -121,11 +104,8 @@ export default function ProjectsPage() {
           { y: "0%", duration: 0.5, stagger: 0.05, ease: "power2.out" },
           "-=0.4"
         );
-
       } else {
-        // KAPANMA
         gsap.to(arrowRef.current, { rotation: 0, duration: 0.5 });
-
         tl.to(".menu-text-inner", {
             y: "-100%",
             duration: 0.3,
@@ -139,7 +119,6 @@ export default function ProjectsPage() {
         }, "-=0.1");
       }
     }, containerRef);
-
     return () => ctx.revert();
   }, [isDropdownOpen]);
 
@@ -151,7 +130,7 @@ export default function ProjectsPage() {
   };
 
   // ---------------------------------------------------------
-  // 4. FİLTRELEME MANTIĞI
+  // 4. FİLTRELEME
   // ---------------------------------------------------------
   useEffect(() => {
     if (selectedCategories.includes('All Projects')) {
@@ -174,114 +153,123 @@ export default function ProjectsPage() {
       newCategories = ['All Projects'];
     } else {
       if (newCategories.includes('All Projects')) newCategories = [];
-      
       if (newCategories.includes(cat)) {
         newCategories = newCategories.filter(c => c !== cat);
       } else {
         newCategories.push(cat);
       }
-
       if (newCategories.length === 0) newCategories = ['All Projects'];
     }
     setSelectedCategories(newCategories);
   };
 
   return (
+    // Padding: About ile aynı (px-6 md:px-12)
     <div ref={containerRef} className="min-h-screen bg-[#f3f2ed] text-[#1c1c1c] pt-40 px-6 md:px-12 pb-24 overflow-hidden" 
           onClick={() => isDropdownOpen && setIsDropdownOpen(false)}>
       
-      {/* --- CUSTOM CURSOR ELEMENTİ --- */}
-      {/* 'hidden lg:flex' sınıfı ile sadece geniş ekranlarda (Desktop) görünür, mobilde gizlenir */}
+      {/* CUSTOM CURSOR */}
       <div 
         ref={cursorRef}
-        className="hidden lg:flex fixed top-0 left-0 z-[9999] pointer-events-none -translate-x-1/2 -translate-y-1/2 items-center justify-center mix-blend-difference"
-        style={{ width: '100px', height: '100px', opacity: 0, transform: 'scale(0)' }} 
+        className="hidden lg:flex fixed top-0 left-0 z-[9999] pointer-events-none items-center justify-center mix-blend-difference"
+        style={{ width: `${CURSOR_SIZE}px`, height: `${CURSOR_SIZE}px`, opacity: 0, transform: 'scale(0)' }} 
       >
         <div className="absolute inset-0 bg-white rounded-full opacity-100"></div>
-        <span ref={cursorTextRef} className="relative z-10 text-xs font-bold tracking-widest text-black uppercase">
-            View
-        </span>
+        <span ref={cursorTextRef} className="relative z-10 text-xs font-bold tracking-widest text-black uppercase">View</span>
       </div>
 
-      {/* BAŞLIK ALANI */}
-      <div className="flex flex-col items-start justify-between mb-20 md:flex-row md:items-end">
-        <div className="relative z-10">
+      {/* --- BAŞLIK ALANI (12'Lİ GRID) --- */}
+      <div className="grid items-end w-full grid-cols-1 mb-20 md:grid-cols-12">
+        
+        {/* SOL: 8 Sütun (Başlık) - Optik Hiza */}
+        {/* -ml-[0.05em] ile fontun solundaki doğal boşluğu alıyoruz */}
+        <div className="relative z-10 md:col-span-8 -ml-[0.05em]">
             <TextRevealScrub>
-                <h1 className="text-[13vw] leading-[0.85] font-heading font-black tracking-tighter uppercase text-[#1c1c1c]">
-                        Projects
+                {/* DÜZELTME: text-[10vw] About ile aynı boyut */}
+                <h1 className="text-[4vw] leading-[0.5] font-heading font-black tracking-tighter uppercase text-[#1c1c1c] m-0 p-0">
+                       projects
                 </h1>
             </TextRevealScrub>
         </div>
-        <div className="mt-6 font-mono text-sm tracking-widest uppercase md:mt-0 md:mb-4 opacity-60">
-            [{filteredProjects.length} Projects]
+
+        {/* SAĞ: 4 Sütun (Sayaç) - Sağ Hiza */}
+        {/* pl-12 ile gridin sağ bloğuna itildi */}
+        <div className="flex flex-col items-end justify-end h-full md:col-span-4 md:pl-12 md:items-start">
+            <span className="mb-2 font-mono text-sm tracking-widest uppercase opacity-60">
+                [{filteredProjects.length} Projects]
+            </span>
         </div>
       </div>
 
-      {/* KONTROL ÇUBUĞU */}
-      <div className="sticky top-0 z-50 flex items-center justify-between py-6 mb-12 bg-[#f3f2ed]/90 backdrop-blur-md border-b border-black/5">
+      {/* --- KONTROL ÇUBUĞU (12'Lİ GRID) --- */}
+      <div className="sticky top-0 z-50 grid grid-cols-2 md:grid-cols-12 items-center py-6 mb-12 bg-[#f3f2ed]/90 backdrop-blur-md border-b border-black/5">
         
-        {/* CUSTOM DROPDOWN (ANIMATED) */}
-        <div className="relative w-72" onClick={(e) => e.stopPropagation()}>
-            
-            <button 
-                ref={triggerRef}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className={`flex items-center justify-between w-full px-5 py-4 text-sm font-bold tracking-wide transition-all duration-300 border rounded-none group hover:bg-[#1c1c1c] hover:text-[#f3f2ed] ${isDropdownOpen ? 'bg-[#1c1c1c] text-[#f3f2ed] border-[#1c1c1c]' : 'bg-transparent border-[#1c1c1c] text-[#1c1c1c]'}`}
-            >
-                <span className="uppercase">
-                    {selectedCategories.includes('All Projects') 
-                        ? 'Filter Categories' 
-                        : `${selectedCategories.length} Selected`}
-                </span>
-                <svg ref={arrowRef} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 9l6 6 6-6"/>
-                </svg>
-            </button>
+        {/* SOL: 6 Sütun (Filtre) */}
+        {/* pl-0 ile başlık hizasından başlatıyoruz */}
+        <div className="col-span-1 pl-0 md:col-span-6">
+            <div className="relative w-72" onClick={(e) => e.stopPropagation()}>
+                <button 
+                    ref={triggerRef}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className={`flex items-center justify-between w-full px-5 py-4 text-sm font-bold tracking-wide transition-all duration-300 border rounded-none group hover:bg-[#1c1c1c] hover:text-[#f3f2ed] ${isDropdownOpen ? 'bg-[#1c1c1c] text-[#f3f2ed] border-[#1c1c1c]' : 'bg-transparent border-[#1c1c1c] text-[#1c1c1c]'}`}
+                >
+                    <span className="uppercase">
+                        {selectedCategories.includes('All Projects') 
+                            ? 'Filter Categories' 
+                            : `${selectedCategories.length} Selected`}
+                    </span>
+                    <svg ref={arrowRef} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                </button>
 
-            {/* DROPDOWN MENU */}
-            <div 
-                ref={dropdownRef}
-                className="absolute left-0 w-full mt-0 overflow-hidden bg-[#1c1c1c] text-[#f3f2ed] shadow-2xl h-0 opacity-0 hidden"
-            >
-                <div className="py-4">
-                    {categories.map((cat, i) => {
-                        const isSelected = selectedCategories.includes(cat);
-                        return (
-                            <div 
-                                key={i}
-                                onClick={(e) => toggleCategory(cat, e)}
-                                className="relative flex items-center justify-between px-6 py-3 overflow-hidden transition-colors cursor-pointer group hover:bg-white/5"
-                            >
-                                <div className="relative flex items-center w-full h-6 gap-3 overflow-hidden">
-                                    <span className={`w-1.5 h-1.5 rounded-full bg-[#f3f2ed] transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}></span>
-                                    <span className={`menu-text-inner text-sm font-medium uppercase tracking-wider block transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>
-                                        {cat}
-                                    </span>
+                {/* DROPDOWN MENU */}
+                <div 
+                    ref={dropdownRef}
+                    className="absolute left-0 w-full mt-0 overflow-hidden bg-[#1c1c1c] text-[#f3f2ed] shadow-2xl h-0 opacity-0 hidden"
+                >
+                    <div className="py-4">
+                        {categories.map((cat, i) => {
+                            const isSelected = selectedCategories.includes(cat);
+                            return (
+                                <div 
+                                    key={i}
+                                    onClick={(e) => toggleCategory(cat, e)}
+                                    className="relative flex items-center justify-between px-6 py-3 overflow-hidden transition-colors cursor-pointer group hover:bg-white/5"
+                                >
+                                    <div className="relative flex items-center w-full h-6 gap-3 overflow-hidden">
+                                        <span className={`w-1.5 h-1.5 rounded-full bg-[#f3f2ed] transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}></span>
+                                        <span className={`menu-text-inner text-sm font-medium uppercase tracking-wider block transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}>
+                                            {cat}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
+                    <div className="w-full h-1 bg-white/10"></div>
                 </div>
-                <div className="w-full h-1 bg-white/10"></div>
             </div>
         </div>
 
-        {/* View Toggle (Grid/List) */}
-        <div className="flex items-center gap-2 pl-6 border-l border-black/10">
-            <button 
-                onClick={() => setView('grid')} 
-                className={`p-2 transition-all duration-300 ${view === 'grid' ? 'bg-[#1c1c1c] text-white scale-110' : 'hover:bg-black/5 text-[#1c1c1c]/60'}`}
-                aria-label="Grid View"
-            >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            </button>
-            <button 
-                onClick={() => setView('list')} 
-                className={`p-2 transition-all duration-300 ${view === 'list' ? 'bg-[#1c1c1c] text-white scale-110' : 'hover:bg-black/5 text-[#1c1c1c]/60'}`}
-                aria-label="List View"
-            >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
-            </button>
+        {/* SAĞ: 6 Sütun (View Toggle) - Sağa Yaslı */}
+        <div className="flex justify-end col-span-1 pl-6 md:col-span-6">
+            <div className="flex items-center gap-2 pl-6 border-l border-black/10">
+                <button 
+                    onClick={() => setView('grid')} 
+                    className={`p-2 transition-all duration-300 ${view === 'grid' ? 'bg-[#1c1c1c] text-white scale-110' : 'hover:bg-black/5 text-[#1c1c1c]/60'}`}
+                    aria-label="Grid View"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <button 
+                    onClick={() => setView('list')} 
+                    className={`p-2 transition-all duration-300 ${view === 'list' ? 'bg-[#1c1c1c] text-white scale-110' : 'hover:bg-black/5 text-[#1c1c1c]/60'}`}
+                    aria-label="List View"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+                </button>
+            </div>
         </div>
       </div>
 

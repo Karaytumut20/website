@@ -30,7 +30,6 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSending(true);
 
-    // Tıklama anındaki 'küçülme' animasyonu
     gsap.to(buttonRef.current, {
         scale: 0.95,
         duration: 0.1,
@@ -76,7 +75,7 @@ export default function ContactPage() {
         duration: 0.8,
         ease: 'power2.out'
     }, "-=0.8")
-    // 3. Form Elemanları (Buton da buna dahil artık)
+    // 3. Form Elemanları
     .from(formRef.current.children, {
         y: 20,
         opacity: 0,
@@ -84,35 +83,35 @@ export default function ContactPage() {
         stagger: 0.05, 
         ease: 'power2.out'
     }, "-=0.6");
-    
-    // NOT: Butona özel .from() animasyonu kaldırıldı.
-    // Buton artık üstteki formRef.current.children animasyonuyla beraber geliyor.
-    // Bu sayede opacity sorunu çözüldü.
 
   }, { scope: containerRef });
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#e3e3db] text-[#1c1c1c] pt-32 px-4 md:px-10 pb-20 font-sans selection:bg-black selection:text-white">
+    // Padding: Standart 12'li Grid (px-6 md:px-12) | pt-40
+    <div ref={containerRef} className="min-h-screen bg-[#e3e3db] text-[#1c1c1c] pt-40 px-6 md:px-12 pb-24 font-sans selection:bg-black selection:text-white flex flex-col">
       
-      {/* BAŞLIK */}
-      <div className="flex flex-col items-start justify-between mb-12 md:flex-row md:items-end">
-         <div className="relative z-10">
+      {/* --- BAŞLIK ALANI (12'Lİ HİZALI GRID) --- */}
+      <div className="grid items-end w-full grid-cols-1 mb-20 md:grid-cols-12">
+         {/* SOL: 8 Sütun (Başlık) - pl-0 */}
+         <div className="relative z-10 pl-0 md:col-span-8">
              <TextRevealScrub>
-                 <h1 className="text-[13vw] leading-[0.85] font-black tracking-tighter uppercase text-[#1c1c1c]">
+                 {/* Standart Boyut: 10vw */}
+                 <h1 className="text-[4vw] leading-[0.5] font-heading font-black tracking-tighter uppercase text-[#1c1c1c] m-0 p-0">
                      Contact
                  </h1>
              </TextRevealScrub>
          </div>
       </div>
 
-      {/* ÇİZGİ */}
-      <div className="w-full h-0.5 bg-black/10 divider-line mb-16"></div>
+      {/* --- ÇİZGİ (Tam Genişlik) --- */}
+      <div className="w-full h-px mb-16 bg-black/10 divider-line"></div>
 
-      {/* İÇERİK */}
-      <div className="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-20">
+      {/* --- İÇERİK ALANI (12'Lİ GRID) --- */}
+      <div className="grid grid-cols-1 md:grid-cols-12">
         
-        {/* SOL KOLON */}
-        <div className="md:col-span-4 info-section">
+        {/* SOL KOLON (BİLGİ): 4 Sütun */}
+        {/* pl-0 ile sol hizada başlar */}
+        <div className="pl-0 pr-6 md:col-span-4 info-section">
            <p className="text-xl font-medium leading-relaxed opacity-70">
              Have an idea in mind? Let’s create something distinctive together. Fill out the form, and lets start the conversation.
            </p>
@@ -126,8 +125,9 @@ export default function ContactPage() {
            </div>
         </div>
 
-        {/* SAĞ KOLON: FORM */}
-        <div className="relative md:col-span-8">
+        {/* SAĞ KOLON (FORM): 8 Sütun */}
+        {/* pl-12 ile sağ bloğa oturur */}
+        <div className="relative mt-12 md:col-span-8 md:pl-12 md:mt-0">
           <form 
             ref={formRef} 
             onSubmit={handleSend}
@@ -196,7 +196,7 @@ export default function ContactPage() {
                         {!isSending && (
                              <svg className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
+                             </svg>
                         )}
                     </span>
                     <div className="absolute inset-0 transition-transform duration-500 ease-out origin-left transform scale-x-0 bg-[#333] group-hover:scale-x-100"></div>

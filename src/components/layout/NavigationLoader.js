@@ -109,7 +109,7 @@ export default function NavigationLoader() {
       ref={overlayRef}
       className="fixed inset-0 z-[9999] bg-[#0a0a0a] text-white flex items-center justify-center hidden"
     >
-        <h2 ref={textRef} className="text-4xl md:text-6xl font-bold uppercase tracking-tighter opacity-0">
+        <h2 ref={textRef} className="text-4xl font-bold tracking-tighter uppercase opacity-0 md:text-6xl">
             H & H
         </h2>
     </div>

@@ -47,12 +47,17 @@ export default function Header() {
     <>
       <header 
         ref={headerRef}
-        className="fixed top-0 left-0 w-full h-auto z-[100] mix-blend-difference pointer-events-none px-6 py-6 md:px-10 md:py-8"
+        // DÜZELTME 1: Padding değerleri diğer sayfalarla (Projects, About) eşitlendi (px-6 md:px-12).
+        // Bu sayede logo ve menü, aşağıdaki içerikle aynı hizada başlar.
+        className="fixed top-0 left-0 w-full h-auto z-[100] mix-blend-difference pointer-events-none px-6 py-6 md:px-12 md:py-8"
       >
-        <div className="relative flex items-start justify-between w-full">
+        {/* DÜZELTME 2: 12'li Grid Yapısı Kuruldu */}
+        {/* Logo sol 6 sütuna, Menü sağ 6 sütuna yerleşir */}
+        <div className="grid items-start w-full grid-cols-2 md:grid-cols-12">
           
-          {/* SOL ÜST: MARKA (LOGO) */}
-          <div className="pointer-events-auto">
+          {/* SOL TARAFI (LOGO) - COL-SPAN-6 */}
+          {/* md:col-span-6 ile gridin sol yarısını kaplar */}
+          <div className="flex justify-start col-span-1 pointer-events-auto md:col-span-6">
             <TransitionLink 
               href="/" 
               className="block overflow-hidden group"
@@ -64,8 +69,9 @@ export default function Header() {
             </TransitionLink>
           </div>
 
-          {/* SAĞ ÜST: MENU TRIGGER */}
-          <div className="pointer-events-auto">
+          {/* SAĞ TARAFI (MENU) - COL-SPAN-6 */}
+          {/* md:col-span-6 ile gridin sağ yarısını kaplar ve sağa yaslanır (justify-end) */}
+          <div className="flex justify-end col-span-1 pointer-events-auto md:col-span-6">
              <button 
                onClick={() => setIsMenuOpen(!isMenuOpen)}
                className="relative flex flex-col items-end justify-start overflow-hidden cursor-pointer group"
@@ -82,9 +88,11 @@ export default function Header() {
           </div>
 
           {/* İKİNCİL BİLGİLER (SCROLL İLE KAYBOLUR) */}
+          {/* Bunları grid'in dışına, absolute olarak koyuyoruz ki grid yapısını bozmadan aşağıda dursunlar. */}
+          {/* Ancak hizaları yine px-6 md:px-12 padding'i sayesinde tutar. */}
           <div 
             ref={secondaryInfoRef}
-            className="absolute top-14 left-0 w-full flex justify-between items-start text-[10px] md:text-xs font-mono uppercase tracking-widest text-white/60 pointer-events-none"
+            className="absolute top-16 left-0 w-full px-6 md:px-12 flex justify-between items-start text-[10px] md:text-xs font-mono uppercase tracking-widest text-white/60 pointer-events-none"
           >
             {/* SOL ALT: KONUM / ROL */}
             <div className="flex flex-col gap-1">
