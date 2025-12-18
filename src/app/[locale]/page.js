@@ -1,9 +1,8 @@
 ﻿'use client';
-import { useEffect, useRef, useLayoutEffect } from 'react';
+import { useEffect, useRef, useLayoutEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import TransitionLink from '@/components/ui/TransitionLink';
-import ProjectList from './projects/components/ProjectList';
 import { projects } from '@/lib/data';
 import TextRevealScrub from '@/components/TextRevealScrub';
 import ProjectGrid from './projects/components/ProjectGrid';
@@ -19,64 +18,121 @@ const services = [
 ];
 
 export default function Home() {
+  // --- MEVCUT REFLER ---
   const mainRef = useRef(null);
   const heroRef = useRef(null);
   const heroTextContainerRef = useRef(null);
   const servicesRef = useRef(null);
 
+  // --- CURSOR STATE & REFS ---
+  const cursorRef = useRef(null);
+  const cursorTextRef = useRef(null);
+  const [isHoveringProject, setIsHoveringProject] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Sayfa yüklendiğinde en üste at
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
+  // ---------------------------------------------------------
+  // 1. CUSTOM CURSOR MOUSE TAKİP MANTIĞI (DÜZELTİLDİ)
+  // ---------------------------------------------------------
+  useEffect(() => {
+    // Ekran genişliği kontrolü
+    const checkIsDesktop = () => {
+      if (window.innerWidth >= 1024) {
+        setIsDesktop(true);
+      } else {
+        setIsDesktop(false);
+      }
+    };
+
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+
+    let xTo, yTo;
+
+    if (cursorRef.current) {
+        // ÖNEMLİ DÜZELTME:
+        // CSS yerine GSAP ile merkezi ayarlıyoruz.
+        // Bu sayede quickTo çalıştığında merkez bozulmaz.
+        gsap.set(cursorRef.current, { xPercent: -50, yPercent: -50 });
+
+        xTo = gsap.quickTo(cursorRef.current, "x", { duration: 0.1, ease: "power3" });
+        yTo = gsap.quickTo(cursorRef.current, "y", { duration: 0.1, ease: "power3" });
+    }
+
+    const moveCursor = (e) => {
+      if (window.innerWidth >= 1024 && cursorRef.current && xTo && yTo) {
+        xTo(e.clientX);
+        yTo(e.clientY);
+      }
+    };
+
+    window.addEventListener("mousemove", moveCursor);
+    
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener('resize', checkIsDesktop);
+    };
+  }, []);
+
+  // ---------------------------------------------------------
+  // 2. CURSOR DURUM ANİMASYONU
+  // ---------------------------------------------------------
+  useEffect(() => {
+    if (!isDesktop || !cursorRef.current) return;
+
+    if (isHoveringProject) {
+      gsap.to(cursorRef.current, {
+        scale: 1,
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    } else {
+      gsap.to(cursorRef.current, {
+        scale: 0,
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+    }
+  }, [isHoveringProject, isDesktop]);
+
+  const handleProjectEnter = () => { if(isDesktop) setIsHoveringProject(true); };
+  const handleProjectLeave = () => { if(isDesktop) setIsHoveringProject(false); };
+
+  // ---------------------------------------------------------
+  // 3. SAYFA ANİMASYONLARI
+  // ---------------------------------------------------------
   useEffect(() => {
     const ctx = gsap.context(() => {
       
-      // --- 1. HERO GİRİŞ ANİMASYONU (LOAD) ---
       const tlLoad = gsap.timeline({ delay: 0.2 });
 
       tlLoad.fromTo('.hero-line-inner',
         { y: '110%', skewY: 10 },
-        { 
-          y: '0%', 
-          skewY: 0,
-          duration: 1.5, 
-          stagger: 0.15, 
-          ease: 'power4.out' 
-        }
+        { y: '0%', skewY: 0, duration: 1.5, stagger: 0.1, ease: 'power4.out' }
       )
       .fromTo('.hero-sub', 
-        { opacity: 0, y: 20 }, 
-        { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }, 
-        "-=0.5"
+        { opacity: 0, x: -20 }, 
+        { opacity: 1, x: 0, duration: 1, ease: 'power2.out' }, 
+        "-=1"
       );
 
-      // --- 2. HERO SCROLL ANİMASYONU (PARALLAX) ---
       gsap.to(heroTextContainerRef.current, {
-        yPercent: 50,
-        opacity: 0,
-        scale: 0.95,
-        ease: 'none',
+        yPercent: 30, opacity: 0, scale: 0.98, ease: 'none',
         scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
+          trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: true,
         }
       });
 
-      // --- 3. SERVICES LIST ANIMATION ---
       const serviceItems = servicesRef.current.querySelectorAll('.service-item');
       gsap.fromTo(serviceItems, 
         { y: 50, opacity: 0 },
         {
-          y: 0,
-          opacity: 1,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: servicesRef.current,
-            start: 'top 80%',
-            toggleActions: 'play none none reverse'
-          }
+          y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out',
+          scrollTrigger: { trigger: servicesRef.current, start: 'top 80%', toggleActions: 'play none none reverse' }
         }
       );
 
@@ -87,65 +143,51 @@ export default function Home() {
   return (
     <div ref={mainRef} className="text-black bg-white selection:bg-black selection:text-white">
       
+      {/* --- CUSTOM CURSOR ELEMENTİ --- */}
+      {/* DÜZELTME: '-translate-x-1/2 -translate-y-1/2' sınıfları kaldırıldı. Bunu artık JS'de GSAP yapıyor. */}
+      <div 
+        ref={cursorRef}
+        className="hidden lg:flex fixed top-0 left-0 z-[9999] pointer-events-none items-center justify-center mix-blend-difference"
+        style={{ width: '100px', height: '100px', opacity: 0, transform: 'scale(0)' }} 
+      >
+        <div className="absolute inset-0 bg-white rounded-full opacity-100"></div>
+        <span ref={cursorTextRef} className="relative z-10 text-xs font-bold tracking-widest text-black uppercase">
+            View
+        </span>
+      </div>
+
       {/* --- HERO SECTION --- */}
-      <div ref={heroRef} className="relative flex flex-col justify-center md:justify-end w-full min-h-[85svh] md:min-h-screen px-4 md:pb-32 overflow-hidden bg-[#e3e3db] md:px-10">
+      <div ref={heroRef} className="relative flex items-center w-full min-h-[85svh] md:min-h-screen px-4 overflow-hidden bg-[#e3e3db] md:px-10">
         
-        {/* Arka plan dekoratif grid çizgileri */}
         <div className="absolute inset-0 z-0 pointer-events-none opacity-5">
            <div className="w-full h-full" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '100px 100px' }}></div>
         </div>
 
-        {/* Hero İçerik Kutusu */}
-        <div ref={heroTextContainerRef} className="relative z-10 flex flex-col w-full">
-            
-            {/* DEVASA BAŞLIK (Maskeleme Efektli) */}
-            <div className="flex flex-col font-black leading-[0.8] tracking-tighter text-[#1c1c1c] uppercase text-[13vw] md:text-[15vw] mix-blend-multiply">
-                
-                {/* 1. Satır: CREATIVE */}
-                <div className="overflow-hidden">
-                    <span className="block hero-line-inner">Creative</span>
-                </div>
-                
-                {/* 2. Satır: DEVELOPER */}
-                <div className="overflow-hidden">
-                    <span className="block font-serif italic hero-line-inner text-black/80">
-                        Developer
+        <div ref={heroTextContainerRef} className="relative z-10 flex flex-col items-start justify-end w-full gap-8 mt-20 md:flex-row md:items-end md:justify-between md:gap-0 md:mt-0 md:mb-10">
+            <div className="flex flex-col font-black leading-[0.9] tracking-tighter text-[#1c1c1c] uppercase text-[7vw] md:text-[6vw] mix-blend-multiply w-full md:w-auto">
+                <div className="overflow-hidden whitespace-nowrap">
+                    <span className="block hero-line-inner">
+                        Independent <span className="font-serif italic text-black/80">Creative</span>
                     </span>
                 </div>
-
-                {/* 3. Satır: & DESIGNER */}
-                <div className="overflow-hidden">
-                    <span className="block text-right md:text-left hero-line-inner">
-                        & Designer
+                <div className="overflow-hidden whitespace-nowrap">
+                    <span className="block hero-line-inner">
+                        Designer & Developer
                     </span>
                 </div>
-
             </div>
 
-            {/* Alt Açıklama */}
-            <div className="mt-8 md:mt-16 md:w-1/3 hero-sub">
-                <p className="text-base leading-relaxed md:text-xl">
+            <div className="w-full md:w-[350px] hero-sub md:text-right md:pb-2">
+                <p className="text-base font-medium leading-relaxed md:text-base opacity-70">
                     I help brands and agencies build immersive digital experiences. 
                     Focusing on interaction, motion, and clean code.
                 </p>
             </div>
-
         </div>
-
-        {/* Scroll İndikatörü */}
-        {/* GÜNCELLEME: bottom-6 -> bottom-24 (Mobil), md:bottom-10 -> md:bottom-32 (Masaüstü) */}
-        <div className="absolute opacity-50 bottom-24 right-4 md:bottom-32 md:right-10 animate-bounce hero-sub">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
-            </svg>
-        </div>
-
       </div>
 
-      {/* --- INTRO & SERVICES (DARK SECTION) --- */}
+      {/* --- INTRO & SERVICES --- */}
       <div className="relative z-30 bg-[#0a0a0a] text-white py-24 md:py-40 px-6 md:px-10 min-h-screen flex flex-col justify-between rounded-t-3xl -mt-10 border-t border-white/10 shadow-2xl">
-        
-        {/* Mission Statement */}
         <div className="grid grid-cols-1 mb-24 md:mb-32 md:grid-cols-12 gap-y-10 md:gap-x-10">
            <div className="col-span-1 md:col-span-4">
               <span className="flex items-center gap-2 font-mono text-xs tracking-widest uppercase text-white/40">
@@ -162,7 +204,6 @@ export default function Home() {
            </div>
         </div>
 
-        {/* Services List */}
         <div ref={servicesRef} className="grid grid-cols-1 pt-16 border-t md:pt-20 md:grid-cols-12 gap-y-10 md:gap-x-10 border-white/10">
             <div className="col-span-1 md:col-span-4">
                 <span className="block mb-6 font-mono text-xs tracking-widest uppercase text-white/40">
@@ -202,8 +243,14 @@ export default function Home() {
               2023 — 2025
           </span>
         </div>
-        
-        <ProjectGrid projects={projects.slice(0, 4)} />
+             
+        <div className="px-6 md:px-10">
+            <ProjectGrid 
+                projects={projects.slice(0, 4)} 
+                onMouseEnter={handleProjectEnter} 
+                onMouseLeave={handleProjectLeave}
+            />
+        </div>
         
         <div className="flex justify-center mt-20 md:mt-24">
           <TransitionLink href="/projects">
@@ -217,7 +264,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- NEW CTA SECTION --- */}
+      {/* --- CTA SECTION --- */}
       <div className="relative z-20 px-6 pt-20 pb-40 bg-white md:px-10">
           <div className="flex flex-col items-center justify-center text-center">
               <span className="mb-6 font-mono text-xs tracking-widest uppercase text-black/40">
